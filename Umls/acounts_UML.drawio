@@ -1,0 +1,43 @@
+<mxfile host="app.diagrams.net" modified="2024-05-08T14:54:03.143Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" etag="TOEeCyNGKPoe9XNf1hvc" version="24.0.7" type="device">
+  <diagram name="Page-1" id="o1ffboKznM2OwtTlNGWT">
+    <mxGraphModel dx="817" dy="503" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="1VtLrzxkGsFnQ24y3Ou_-1" value="user" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="260" y="430" width="160" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="1VtLrzxkGsFnQ24y3Ou_-2" value="&lt;span style=&quot;background-color: initial;&quot;&gt;is_active : bool&lt;/span&gt;&lt;div&gt;admin_projects :&amp;nbsp; list&lt;/div&gt;&lt;div&gt;member_projects: list&lt;/div&gt;&lt;div&gt;account : accounts&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="1VtLrzxkGsFnQ24y3Ou_-1">
+          <mxGeometry y="30" width="160" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="1VtLrzxkGsFnQ24y3Ou_-3" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="1VtLrzxkGsFnQ24y3Ou_-1">
+          <mxGeometry y="130" width="160" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="1VtLrzxkGsFnQ24y3Ou_-4" value="&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;display_projects : void&lt;/span&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;choose_project : projects&lt;/div&gt;&lt;div&gt;create_project : projects&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="1VtLrzxkGsFnQ24y3Ou_-1">
+          <mxGeometry y="138" width="160" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="1VtLrzxkGsFnQ24y3Ou_-27" value="mannager" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="430" width="140" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="1VtLrzxkGsFnQ24y3Ou_-29" value="deactivate accounts&lt;div&gt;&lt;br&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="1VtLrzxkGsFnQ24y3Ou_-27">
+          <mxGeometry y="26" width="140" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="1VtLrzxkGsFnQ24y3Ou_-30" value="delete data&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="1VtLrzxkGsFnQ24y3Ou_-27">
+          <mxGeometry y="52" width="140" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="1VtLrzxkGsFnQ24y3Ou_-35" value="account" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="170" width="160" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="1VtLrzxkGsFnQ24y3Ou_-36" value="password :&amp;nbsp; string&lt;div&gt;username : string&lt;/div&gt;&lt;div&gt;email_address : string&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="1VtLrzxkGsFnQ24y3Ou_-35">
+          <mxGeometry y="26" width="160" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="1VtLrzxkGsFnQ24y3Ou_-37" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="1VtLrzxkGsFnQ24y3Ou_-35">
+          <mxGeometry y="90" width="160" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="1VtLrzxkGsFnQ24y3Ou_-38" value="&lt;div&gt;change_email :void&lt;/div&gt;&lt;div&gt;delete_account : void&lt;/div&gt;&lt;div&gt;check_email : void&lt;/div&gt;&lt;div&gt;check_username : void&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="1VtLrzxkGsFnQ24y3Ou_-35">
+          <mxGeometry y="98" width="160" height="82" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
