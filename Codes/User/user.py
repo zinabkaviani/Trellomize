@@ -4,13 +4,13 @@ import os
 import globals
 from rich import print
 
+
 class Account:
     
-    def __init__(self, username = None , password = None, email_address = None):
-        self.__username = username
-        self.__password = password
-        self.__email_address = email_address
-
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+    
     def get_username(self):
         return self.__username
 
@@ -20,24 +20,23 @@ class Account:
     def encode_password(password_input):
         return bcrypt.hashpw(password_input.encode('utf-8'), bcrypt.gensalt())
     
-    def check_password(entered_password , hashed_password):
+    def __check_password(entered_password , hashed_password):
         return bcrypt.checkpw(entered_password.encode('utf-8'), hashed_password)
     
-    def save_user_data(self):
-        user_data = {
-            "username": self.__username,
+    def save_account_data(self):
+        account_data = {
             "password_hash": self.encode_password(self.__password),  # Save the password hash directly as bytes
             "email": self.__email_address
         }
-        with open('Data\\Acount_Data\\user_data.json', 'w') as file:
-            json.dump(user_data, file)
+        with open(f'Data\\Acount_Data\\Acounts\\{self.__username}.json', 'w') as file:
+            json.dump(account_data, file)
 
     def set_attributes_from_json(self, filename):
+        self.__username = filename
         with open(filename, 'r') as file:
             data = json.load(file)
             for key , value in data:
                 setattr(self, key, value)
-
 
     def register(self):
         self.__username = input("Enter username: ")
@@ -87,3 +86,6 @@ class Account:
             username = input("Enter your username: ")
             self.change_email(username)
 
+x = Account()
+x.__username = 1
+print(x.get_username())
