@@ -40,7 +40,7 @@ class Account:
             for key , value in data.items():  # Fixed the iteration over items
                 setattr(self, key, value)
 
-    def register(self):
+def register(self):
         self.__username = input("Enter username: ")
         self.__email_address = input("Enter email address: ")
         self.__password = input("Enter password: ")
@@ -51,9 +51,9 @@ class Account:
         else:
             with open("Data\\Acounts_Data\\users.txt", "a") as file:
                 file.write(f"{self.__username},{self.__email_address}\n")
-            print_message("Account successfully created.",color="green")
+            print_message("Account successfully created.", color="green")
 
-    def check_existing_username(self, username):
+def check_existing_username(self, username):
         if os.path.exists("Data\\Acounts_Data\\users.txt"):
             with open("Data\\Acounts_Data\\users.txt", "r") as file:
                 for line in file:
@@ -61,31 +61,32 @@ class Account:
                     if username == stored_username:
                         return True
         return False
+# change email is in the user part
+# def change_email(self):
+#        new_email = input("Enter the new email address: ")
+#        if not self.check_existing_username(self.__username):
+#            with open("Data\\Acounts_Data\\users.txt", "r") as file:
+#                lines = file.readlines()
+#            with open("Data\\Acounts_Data\\users.txt", "w") as file:
+#                for line in lines:
+#                    stored_username, stored_email = line.strip().split(',')
+#                    if stored_username == self.__username:
+#                        file.write(f"{self.__username},{new_email}\n")
+#                    else:
+#                        file.write(line)
+#            print_message("Email address updated successfully.", color="green")
+#        else:
+#            print_message("Username already exists.", color="red")
 
-    def change_email(self):
-        new_email = input("Enter the new email address: ")
-        if not self.check_existing_username(self.__username):
-            with open("Data\\Acounts_Data\\users.txt", "r") as file:
-                lines = file.readlines()
-            with open("Data\\Acounts_Data\\users.txt", "w") as file:
-                for line in lines:
-                    stored_username, stored_email = line.strip().split(',')
-                    if stored_username == self.__username:
-                        file.write(f"{self.__username},{new_email}\n")
-                    else:
-                        file.write(line)
-            print_message("Email address updated successfully.",color="green")
-        else:
-            print_message("Username already exists.",color="red")
-
-    def register_section(self):
+def register_section(self):
         options = ["Register", "Change Email"]
         choice = globals.get_arrow_key_input(options)
 
         if choice == "Register":
             self.register()
-        elif choice == "Change Email":
-            self.change_email()
+#        elif choice == "Change Email":
+#           self.change_email()
+
 
 class User:
     def __init__(self, account, leading_projects, contributing_projects, is_active = True):
