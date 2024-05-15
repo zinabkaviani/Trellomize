@@ -1,6 +1,10 @@
 import os
 import msvcrt
 from colored import fg, attr
+import json
+import string
+import random
+import datetime
 
 
 def get_arrow_key_input(options, available_options):
@@ -9,7 +13,7 @@ def get_arrow_key_input(options, available_options):
     
     while True:
         os.system('cls' if os.name == 'nt' else 'clear')  # Clear the screen
-        print_options(options , selected_index , available_options = options)
+        print_options(options , selected_index , available_options)
 
         key = ord(msvcrt.getch())
         if key == 72:  # Up arrow key
@@ -45,3 +49,38 @@ def print_message(message, color="white"):
     print(f'│ {colored_message:<{max_length}}       │')  # Removed color from the border
     print('╰' + '─' * (max_length + 8) + '╯')
 
+def check_existing_username(self, username):
+            if os.path.exists("Data\\Acounts_Data\\users.txt"):
+                with open("Data\\Acounts_Data\\users.txt", "r") as file:
+                    for line in file:
+                        stored_username, _ = line.strip().split(',')
+                        if username == stored_username:
+                            return True
+            return False
+    
+def check_existing_email(self, email_address):
+            if os.path.exists("Data\\Acounts_Data\\users.txt"):
+                with open("Data\\Acounts_Data\\users.txt", "r") as file:
+                    for line in file:
+                        _ , sorted_email_address = line.strip().split(',')
+                        if email_address == sorted_email_address:
+                            return True
+            return False
+
+def generate_random_id(existing_ids, length= 6):
+    while True:
+        # Generate a random ID
+        random_id = ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+        
+        # Check if the ID is not in the existing list
+        if random_id not in existing_ids:
+            return random_id
+        
+def get_current_time() :
+    current_time = datetime.datetime.now()
+    formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    return formatted_time
+def get_added_time(start_time , **keyword) :
+    end_time = start_time + datetime.timedelta(**keyword)
+    return end_time
+     
