@@ -53,11 +53,11 @@ class Account:
             self.__email_address = input("Enter email address: ")
             self.__password = input("Enter password: ")
 
-            if self.check_existing_username(self.__username):
+            if globals.check_existing_username(self.__username):
                 error_messages = [["Error", "Username already exists."]]
                 print_message(f"{error_messages[0][0]}: {error_messages[0][1]}", color="red")
             
-            elif self.check_existing_email(self.__email_address) :
+            elif globals.check_existing_email(self.__email_address) :
                 error_messages =[["Error" , "Email address already exists."]]
                 print_message(f"{error_messages[0][0]}: {error_messages[0][1]}" , color ="red")
             
@@ -65,24 +65,7 @@ class Account:
                 with open("Data\\Acounts_Data\\users.txt", "a") as file:
                     file.write(f"{self.__username},{self.__email_address}\n")
                 print_message("Account successfully created.", color="green")
-
-    def check_existing_username(self, username):
-            if os.path.exists("Data\\Acounts_Data\\users.txt"):
-                with open("Data\\Acounts_Data\\users.txt", "r") as file:
-                    for line in file:
-                        stored_username, _ = line.strip().split(',')
-                        if username == stored_username:
-                            return True
-            return False
-    
-    def check_existing_email(self, email_address):
-            if os.path.exists("Data\\Acounts_Data\\users.txt"):
-                with open("Data\\Acounts_Data\\users.txt", "r") as file:
-                    for line in file:
-                        _ , sorted_email_address = line.strip().split(',')
-                        if email_address == sorted_email_address:
-                            return True
-            return False
+#import csv
     
     def change_email(self):
            new_email = input("Enter the new email address: ")
@@ -91,7 +74,7 @@ class Account:
                    lines = file.readlines()
                with open("Data\\Acounts_Data\\users.txt", "w") as file:
                   for line in lines:
-                       stored_username, stored_email = line.strip().split(',')
+                       stored_username, _ = line.strip().split(',')
                        if stored_username == self.__username:
                            file.write(f"{self.__username},{new_email}\n")
                        else:
@@ -129,15 +112,15 @@ class User:
         pass
     
     def choose_project(self):
-        while(True):
+        while True:
             choice = globals.get_arrow_key_input(['Leading projects' , 'Contributing projects' , 'Exit'])
             if choice == 'Leading projects':
                 result = self.choose_leading_projects()
-                if(result != None):
+                if result != None :
                     return result
             elif choice == 'Contributing projects':
                 result = self.choose_contributing_projects()
-                if(result != None):
+                if result != None:
                     return result
             else:
                 return
