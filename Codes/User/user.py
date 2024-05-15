@@ -30,9 +30,10 @@ class Account:
             "password_hash": self.encode_password(self.__password),  # Save the password hash directly as bytes
             "email": self.__email_address
         }
-        with open(f'Data\\Acounts_Data\\Acounts\\{self.__username}.json', 'w') as file:
-            json.dump(account_data, file)
-    
+        if os.path.exists(f'Data\\Acount_Data\\Acounts\\{self.__username}.json'):
+            with open(f'Data\\Acount_Data\\Acounts\\{self.__username}.json', 'w') as file:
+                json.dump(account_data, file)
+
     def account_setting_menu(self) :
         option =["Change Email" , "Delete User" , "Sing Out", "Back"]
         while True :
@@ -47,7 +48,6 @@ class Account:
                 case "Back" :
                     return "back"
 
-    
     def register(self):
             self.__username = input("Enter username: ")
             self.__email_address = input("Enter email address: ")
@@ -182,4 +182,3 @@ class User:
                         return 
                     elif selected_option == "back" :
                         continue
-
