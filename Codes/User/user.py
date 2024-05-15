@@ -56,6 +56,11 @@ class Account:
             if self.check_existing_username(self.__username):
                 error_messages = [["Error", "Username already exists."]]
                 print_message(f"{error_messages[0][0]}: {error_messages[0][1]}", color="red")
+            
+            elif self.check_existing_email(self.__email_address) :
+                error_messages =[["Error" , "Email address already exists."]]
+                print_message(f"{error_messages[0][0]}: {error_messages[0][1]}" , color ="red")
+            
             else:
                 with open("Data\\Acounts_Data\\users.txt", "a") as file:
                     file.write(f"{self.__username},{self.__email_address}\n")
@@ -69,6 +74,16 @@ class Account:
                         if username == stored_username:
                             return True
             return False
+    
+    def check_existing_email(self, email_address):
+            if os.path.exists("Data\\Acounts_Data\\users.txt"):
+                with open("Data\\Acounts_Data\\users.txt", "r") as file:
+                    for line in file:
+                        _ , sorted_email_address = line.strip().split(',')
+                        if email_address == sorted_email_address:
+                            return True
+            return False
+    
     def change_email(self):
            new_email = input("Enter the new email address: ")
            if not self.check_existing_username(self.__username):
