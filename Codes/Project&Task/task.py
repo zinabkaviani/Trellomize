@@ -48,12 +48,10 @@ class Status(Enum):
     ARCHIVED = auto()
 
 class Task:
-    def __init__(self, signed_in_username = "" ,  candidates_for_assignment = [], main_project_id = "",
-                random_id = "" , title = "", description = "", start_date = "", end_date = None, leader = "",
-                assignees = [], priority = Priority.LOW, status = Status.BACKLOG, history = "", comments = []):
-        self.__signed_in_username = signed_in_username
+    def __init__(self,  candidates_for_assignment = [], random_id = "" , title = "", description = "", start_date = "",
+                 end_date = None, leader = "", assignees = [], priority = Priority.LOW, status = Status.BACKLOG, history = "",
+                 comments = []):
         self.__candidates_for_assignment = candidates_for_assignment
-        self.__main_project_id = main_project_id
         self.__random_id = random_id
         self.__title = title
         self.__description = description
@@ -80,7 +78,7 @@ class Task:
             "history" : self.__history,
             "comments" : [comment.__dict__ for comment in self.__comments]
         }
-        with open(f"Data\\Projects_Data\\{self.__main_project_id}\\{self.__random_id}.json" , 'w') as file:
+        with open(f"Data\\Projects_Data\\{globals.project_id}\\{self.__random_id}.json" , 'w') as file:
             globals.json.dump(task_data , file)
 
     def edit_title(self):
@@ -118,7 +116,8 @@ class Task:
     def add_assignees(self):
         """add an assignee for the task"""
         options = [*self.__candidates_for_assignment , "Back"]
-        choice = globals.get_arrow_key_input(options=options, available_options= options)
+        indices_list = list(range(len(options)))
+        choice = options[globals.get_arrow_key_input(options=options, available_indices= indices_list)]
         if choice != "Back":
             self.__assignees.append(choice)
             self.__update_file_attributes()
@@ -126,7 +125,8 @@ class Task:
     def remove_assignees(self):
         """remove an assignee from the task"""
         options = [*self.__candidates_for_assignment , "Back"]
-        choice = globals.get_arrow_key_input(options=options, available_options=options)
+        indices_list = list(range(len(options)))
+        choice = options[globals.get_arrow_key_input(options=options, available_indices=indices_list)]
         if choice != "Back":
             self.__assignees.remove(choice)
             self.__update_file_attributes()
@@ -169,11 +169,11 @@ class Task:
     def comments_menu(self):
         """Displays the menu of the available options to do with comments"""
         options = ["Display Comments" , "Add Comments" , "Remove Comments" , "Edit Comments" , "Back"]
-        available_options = options
-        if self.__signed_in_username not in [*self.__assignees , self.__leader]:
-            available_options = ["Display Comments" , "Back"]
+        available_indices = options
+        if globals.signed_in_username not in [*self.__assignees , self.__leader]:
+            available_indices = [0,4]
         while True:
-            choice = globals.get_arrow_key_input(options=options, available_options=available_options)
+            choice = options[globals.get_arrow_key_input(options=options, available_indice=available_indices)]
             match choice:
                 case "Display Comments":
                     self.display_comments()
@@ -189,19 +189,19 @@ class Task:
         options = ["Edit Title" , "Edit Description" , "Add Assignees" , "Remove Assignees" ,
                    "Change The Priority Of The Task" , "Change The Status Of The Task" ,
                    "Display The History Of The Task" , "Change The Due Date" , "Comments Section" , "Back"]
-        available_options =[]
+        available_indices =[]
 
-        if self.__leader == self.__signed_in_username :
-            available_options = options
-        elif self.__signed_in_username in self.__assignees :
-            available_options = ["Edit Title" , "Edit Description" ,
+        if self.__leader == globals.signed_in_username :
+            available_indices = options
+        elif globals.signed_in_username in self.__assignees :
+            available_indices = ["Edit Title" , "Edit Description" ,
                    "Change The Priority Of The Task" , "Change The Status Of The Task" ,
                    "Display The History Of The Task" , "Change The Due Date" , "Comments Section" , "Back"]
         else :
-            available_options = ["Display The History Of The Task" , "Comments Section" , "Back"]
+            available_indices = ["Display The History Of The Task" , "Comments Section" , "Back"]
             
         while True:
-            choice = globals.get_arrow_key_input(options=options, available_options=available_options)
+            choice = options[globals.get_arrow_key_input(options=options, available_indices=available_indices)]
             match choice:
                 case "Edit Title" :
                     self.edit_title()
