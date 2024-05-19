@@ -7,34 +7,41 @@ import random
 import datetime
 import keyboard
 
-def get_arrow_key_input(options, available_options):
+signed_in_username = None
+project_id = None
+task_id =None
 
-    selected_index = 0
-    
-    while True:
+def get_arrow_key_input(options, available_indices):
+    if not available_indices:
+        return None 
+
+    selected_index = available_indices[0] 
+    def print_options(options, selected_index, available_indices):
         os.system('cls' if os.name == 'nt' else 'clear')  # Clear the screen
-        print_options(options , selected_index , available_options)
+        print("Use arrow keys to select:")
+        for idx, option in enumerate(options):
+            if idx == selected_index:
+                print("\033[1;32;40m" + f"> {option}" + "\033[m")  # Highlight the selected option in green
+            elif idx in available_indices:
+                print(f"  {option}")
+            else:
+                print("\033[1;30;40m" + f"  {option}" + "\033[m")  # Unavailable option in dim color
 
-        key = ord(msvcrt.getch())
-        if key == 72:  # Up arrow key
-            selected_index = (selected_index - 1) % len(available_options)
-        elif key == 80:  # Down arrow key
-            selected_index = (selected_index + 1) % len(available_options)
-        elif key == 13:  # Enter key
-            return available_options[selected_index]
-        
+    while True:
+        print_options(options, selected_index, available_indices)
+        key = keyboard.read_event()
 
-def print_options(options, available_options,selected_index):
-    print("Use arrow keys to select:")
-    chosen_index = options.find(available_options[selected_index])
-    for index, option in enumerate(options):
-        if index == chosen_index:
-            print("\033[1;32;40m" + f"> {option}" + "\033[m")  # Highlight the selected option in green
-        elif option not in available_options :
-            print("\033[1;30;40m" + f"> {option}" + "\033[m")
-        else:
-            print(f"  {option}")
-        
+        if key.event_type == keyboard.KEY_DOWN:
+            if key.name == 'up':
+                selected_index = available_indices[(available_indices.index(selected_index) - 1) % len(available_indices)]
+            elif key.name == 'down':
+                selected_index = available_indices[(available_indices.index(selected_index) + 1) % len(available_indices)]
+            elif key.name == 'enter':
+                if selected_index is not None:
+                    return selected_index
+                else:
+                    error_message =[["Error","No available options to select."]]
+                    print_message(f"{error_message[0][0]}: {error_message[0][1]}",color="red")
 
 def print_message(message, color="white"):
     max_length = len(max(message.split('\n'), key=len))
