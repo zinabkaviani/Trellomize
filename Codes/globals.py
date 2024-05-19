@@ -5,7 +5,7 @@ import json
 import string
 import random
 import datetime
-
+import keyboard
 
 def get_arrow_key_input(options, available_options):
 
@@ -80,7 +80,26 @@ def get_current_time() :
     current_time = datetime.datetime.now()
     formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
     return formatted_time
+
 def get_added_time(start_time , **keyword) :
     end_time = start_time + datetime.timedelta(**keyword)
     return end_time
-     
+
+def get_input_with_cancel(drafted_text = ""):
+    while True:
+        event = keyboard.read_event(suppress=True)
+        if event.event_type == 'down':
+            if event.name == 'esc':
+                return None
+            elif event.name == 'enter':
+                return drafted_text
+            elif event.name == 'backspace':
+                if len(drafted_text) > 0:
+                    print('\b \b', end='', flush=True)
+                    drafted_text = drafted_text[:-1]
+            elif event.name == 'space':
+                print(' ', end='', flush=True)
+                input_text += ' '
+            elif len(event.name) == 1:
+                print(event.name, end='', flush=True)
+                drafted_text += event.name
