@@ -80,11 +80,24 @@ class project :
             globals.json.dump(data,file)
 
     def remove_tasks(self) :
+        
         """leader can remove tasks """ 
-        indices_list = list(range(len(self.__tasks)))
-        choice = self.__tasks[globals.get_arrow_key_input(self.__tasks , indices_list)]
+
         self.__tasks.remove(choice)
         self.__update_file_attributes("tasks")
+        globals.os.remove(f"Data\\Projects_Data\\{choice}")
+        available_tasks =[]     
+        for task_id in self.__tasks:
+            with open(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{task_id}.json" , "r") as file :
+                data= globals.json.load(file)
+                available_tasks.append(data["title"] + 10 * ' ' + task_id + '\n'  + data["description"])
+        available_tasks.append("Back")
+        available_indices = list(range(len(available_tasks)))
+        choice = self.__tasks[globals.get_arrow_key_input(options=available_tasks,available_indices= available_indices)]         
+        self.__tasks.remove(choice)
+        self.__update_file_attributes("tasks")
+        globals.os.remove(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{choice}.json")
+    
 
     def choose_task(self) :
         """choose tasks to open the task"""
