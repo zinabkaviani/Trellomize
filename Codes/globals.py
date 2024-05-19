@@ -6,10 +6,12 @@ import string
 import random
 import datetime
 import keyboard
+import re
 
 signed_in_username = None
 project_id = None
 task_id =None
+
 
 def get_arrow_key_input(options, available_indices):
     if not available_indices:
@@ -110,3 +112,17 @@ def get_input_with_cancel(drafted_text = ""):
             elif len(event.name) == 1:
                 print(event.name, end='', flush=True)
                 drafted_text += event.name
+
+def check_email_format(email):
+    pattern = r'^[a-zA-Z0-9._%+-]+@gmail\.com$'
+    return re.match(pattern, email) is not None
+
+def account_section():
+            options = ["Register", "Log in" , "Exit"]
+            available_indices = [0, 1 , 2]
+            choice = options[globals.get_arrow_key_input(options=options ,available_indices=available_indices)]
+
+            if choice == "Register":
+                register()
+            elif choice == "Log in":
+              self.user_login()
