@@ -8,18 +8,19 @@ import datetime
 import keyboard
 import re
 
-signed_in_username = None
+signed_in_username = "me"
 project_id = None
 task_id =None
 
 
-def get_arrow_key_input(options, available_indices):
+def get_arrow_key_input(options, available_indices, display=""):
     if not available_indices:
         return None 
 
     selected_index = available_indices[0] 
     def print_options(options, selected_index, available_indices):
         os.system('cls' if os.name == 'nt' else 'clear')  # Clear the screen
+        print(display)
         print("Use arrow keys to select:")
         for idx, option in enumerate(options):
             if idx == selected_index:
@@ -31,7 +32,7 @@ def get_arrow_key_input(options, available_indices):
 
     while True:
         print_options(options, selected_index, available_indices)
-        key = keyboard.read_event()
+        key = keyboard.read_event(suppress=True)
 
         if key.event_type == keyboard.KEY_DOWN:
             if key.name == 'up':
@@ -58,7 +59,7 @@ def print_message(message, color="white"):
     print(f'│ {colored_message:<{max_length}}       │')  # Removed color from the border
     print('╰' + '─' * (max_length + 8) + '╯')
 
-def check_existing_username(self, username):
+def check_existing_username(username):
             if os.path.exists("Data\\Acounts_Data\\users.txt"):
                 with open("Data\\Acounts_Data\\users.txt", "r") as file:
                     for line in file:
@@ -67,7 +68,7 @@ def check_existing_username(self, username):
                             return True
             return False
     
-def check_existing_email(self, email_address):
+def check_existing_email(email_address):
             if os.path.exists("Data\\Acounts_Data\\users.txt"):
                 with open("Data\\Acounts_Data\\users.txt", "r") as file:
                     for line in file:
@@ -95,6 +96,7 @@ def get_added_time(start_time , **keyword) :
     return end_time
 
 def get_input_with_cancel(drafted_text = ""):
+    print(drafted_text, end='')
     while True:
         event = keyboard.read_event(suppress=True)
         if event.event_type == 'down':
@@ -108,10 +110,31 @@ def get_input_with_cancel(drafted_text = ""):
                     drafted_text = drafted_text[:-1]
             elif event.name == 'space':
                 print(' ', end='', flush=True)
-                input_text += ' '
+                drafted_text += ' '
             elif len(event.name) == 1:
                 print(event.name, end='', flush=True)
                 drafted_text += event.name
+
+def split_text(text, width):
+            words = text.split()
+            lines = []
+            current_line = ""
+            for word in words:
+                if len(word) > width:
+                    # Split the word into multiple lines
+                    for i in range(0, len(word), width - len(current_line)):
+                        current_line += word[i : i + width - len(current_line)]
+                        if len(current_line) == width:
+                            lines.append(current_line)
+                            current_line = ""
+                elif len(current_line) + len(word) <= width:
+                    current_line += word + " "
+                else:
+                    lines.append(current_line)
+                    current_line = word + " "
+            if current_line:
+                lines.append(current_line)
+            return lines
 
 def check_email_format(email):
     pattern = r'^[a-zA-Z0-9._%+-]+@gmail\.com$'
