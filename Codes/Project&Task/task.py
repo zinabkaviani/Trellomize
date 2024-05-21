@@ -1,6 +1,6 @@
-from .. import globals
+import globals
+
 from enum import Enum, auto
-import curses
 
 class Comment:
     def __init__(self, user_name, text, date_of_comment, time_of_comment):
@@ -10,28 +10,51 @@ class Comment:
         self.__time_of_comment = time_of_comment
     
     def __str__(self) -> str:
-        # message = f"{self.__user_name}\n {self.__date_of_comment}          {self.__time_of_comment} \nComment: {self.__text}"
-        # max_length = len(max(message.split('\n'), key=len))
-        # border = '╭' + '─' * (max_length + 8) + '╮'
-        pass
+        """shows the comment in a nice format"""
+        
+        box_width = 50
+        upper_line = '╭' + '-' * (box_width - 2) + '╮'
+        lower_line = '╰' + '-' * (box_width - 2) + '╯'
+        empty_line = '|' + ' ' * (box_width - 2) + '|'
 
+        
+        text_lines = globals.split_text(self.__text, box_width - 3)
+        is_signed_in = False
+        if self.__user_name == globals.signed_in_username:
+            is_signed_in = True
+        formatted_comment = ''
+        formatted_comment += is_signed_in * 40 * ' ' + upper_line + '\n'
+        formatted_comment += is_signed_in * 40 * ' ' + '| {0:<47}|\n'.format(self.__user_name)
+        formatted_comment += is_signed_in * 40 * ' ' + empty_line + '\n'
 
+        for line in text_lines:
+            formatted_comment += is_signed_in * 40 * ' ' + '| {0:<47}|\n'.format(line.strip())
+
+        formatted_comment += is_signed_in * 40 * ' ' + empty_line + '\n'
+        formatted_comment += is_signed_in * 40 * ' ' + '| {0:<47}|\n'.format(self.__date_of_comment + 28 * ' '\
+                                                                             + self.__time_of_comment)
+        formatted_comment += is_signed_in * 40 * ' ' + lower_line + '\n'
+
+        return formatted_comment
+
+    def get_user_name(self):
+        return self.__user_name
+    
     def edit_comment(self):
         """edit the comment sent before"""
         while True:
             print("Edit the comment bellow(cancel with 'Esc'):")
-            print(self.__text, end='')
             new_text = globals.get_input_with_cancel(self.__text)
             if new_text == "":
-                error_messages =["Error" , "Comments can't be empty ."]
-                globals.print_message(f"{error_messages[0][0]}: {error_messages[0][1]}" , color ="red")
-                globals.print_message()
-                globals.keyboard.read_event()
+                error_messages =["Error" , "Comments can't be empty.(press anything to continue)"]
+                globals.print_message(message=f"{error_messages[0]}: {error_messages[1]}" , color ="red")
+                globals.msvcrt.getch()
             elif new_text == None:
                 break
             else:
                 self.__text = new_text
                 break
+
 
 
 class Priority(Enum):
@@ -86,14 +109,13 @@ class Task:
         while True:
             input_text = self.__title
             print("Edit the title (cancel with Esc):")
-            print(input_text)
             new_title = globals.get_input_with_cancel(input_text)
             if new_title == "":
                 error_messages =["Error" , "Task title can't be empty ."]
-                globals.print_message(f"{error_messages[0][0]}: {error_messages[0][1]}" , color ="red")
+                globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
             
-                globals.print_message()
-                globals.keyboard.read_event()
+                globals.msvcrt.getch()
+                globals.os.system('cls' if globals.os.name == 'nt' else 'clear')  # Clear the screen
             elif new_title == None:
                 break
             else:
@@ -105,7 +127,6 @@ class Task:
         while True:
             input_text = self.__description
             print("Edit the description (cancel with Esc):")
-            print(input_text)
             new_description = globals.get_input_with_cancel(input_text)
             if new_description == None:
                 break
@@ -116,7 +137,10 @@ class Task:
     def add_assignees(self):
         """add an assignee for the task"""
         options = [*self.__candidates_for_assignment , "Back"]
-        indices_list = list(range(len(options)))
+        indices_list = []
+        for assignee_index in range(len(self.__candidates_for_assignment)):
+            if self.__candidates_for_assignment[assignee_index] not in self.__assignees:
+                indices_list.append(assignee_index)
         choice = options[globals.get_arrow_key_input(options=options, available_indices= indices_list)]
         if choice != "Back":
             self.__assignees.append(choice)
@@ -127,17 +151,51 @@ class Task:
         options = [*self.__candidates_for_assignment , "Back"]
         indices_list = list(range(len(options)))
         choice = options[globals.get_arrow_key_input(options=options, available_indices=indices_list)]
+        #Check if the leader is sure about removing the assignee
         if choice != "Back":
             self.__assignees.remove(choice)
             self.__update_file_attributes()
     
     def change_priority(self):
         """changes the urgency of the Task"""
-        pass
-
+        options = ["LOW" , "MEDIUM" , "HIGH" , "CRITICAL" , "BACK"]
+        available_indices = list(range(len(options)))
+        choice = options[globals.get_arrow_key_input(options=options,available_indices=available_indices,display=self)]
+        match choice:
+            case "LOW":
+                self.__priority = Priority.LOW
+                self.__update_file_attributes()
+            case "MEDIUM":
+                self.__priority = Priority.MEDIUM
+                self.__update_file_attributes()
+            case "HIGH":
+                self.__priority = Priority.HIGH
+                self.__update_file_attributes()
+            case "CRITICAL":
+                self.__priority = Priority.CRITICAL
+                self.__update_file_attributes()
+    
     def change_status(self):
         """changes the status of the Task"""
-        pass
+        options = ["BACK LOG" , "TODO" , "DOING" , "DONE" , "ARCHIVED" , "BACK"]
+        available_indices = [0 , 1 , 2 , 3 , 4 , 5]
+        choice = options[globals.get_arrow_key_input(options=options, available_indices=available_indices, display=self)]
+        match choice:
+            case "BACK LOG":
+                self.__status =Status.BACKLOG
+                self.__update_file_attributes()
+            case "TODO":
+                self.__status = Status.TODO
+                self.__update_file_attributes()
+            case "DOING":
+                self.__status = Status.DOING
+                self.__update_file_attributes()
+            case "DONE":
+                self.__status = Status.DONE
+                self.__update_file_attributes()
+            case "ARCHIVED":
+                self.__status = Status.ARCHIVED
+                self.__update_file_attributes()
 
     def display_history(self):
         """Displays the history of the Task"""
@@ -149,41 +207,85 @@ class Task:
 
     def display_comments(self):
         """Displays all the comments on the Task"""
-        pass
+        display = ""
+        for comment in self.__comments:
+            display += str(comment) + '\n'
+        return display
 
     def add_comments(self):
         """the signed in user writes a comment for the task"""
-        pass
-    
+        #we need some discussion about how we show this
+        print(self.display_comments())
+        print("\n\t")
+        comment = globals.get_input_with_cancel()
+        if comment == None:
+            return
+        else:
+            comment_obj = Comment(text=comment, user_name=globals.signed_in_username,\
+                            date_of_comment=str(globals.datetime.datetime.now().date()),\
+                            time_of_comment=globals.datetime.datetime.now().time().strftime("%H:%M:%S"))
+            self.__comments.append(comment_obj)
+            self.__update_file_attributes()
+            return comment_obj
+        
+
     def remove_comments(self):
         """the signed in user can delete a comment of their own in the task"""
-        pass
+        available_indices = []
+        for i in range(len(self.__comments)):
+            if self.__comments[i].get_user_name() == globals.signed_in_username:
+                available_indices.append(i)
+        if self.__leader == globals.signed_in_username:
+            available_indices = list(range(len(self.__comments)))
+        available_indices.append(len(self.__comments))
+        options = ["\n" + str(comment) for comment in self.__comments]
+        chosen_index = globals.get_arrow_key_input(options=[*options, "Back"],\
+                                                    available_indices=available_indices)
+        if chosen_index == len(self.__comments):
+            return
+        choice = self.__comments[chosen_index]
+        #check if the user is sure to delete that comment
+        self.__comments.remove(choice)
+        self.__update_file_attributes()
 
     def edit_comments(self):
         """user can edit the comments they have added"""
-        pass
+        available_indices = []
+        for i in range(len(self.__comments)):
+            if self.__comments[i].get_user_name() == globals.signed_in_username:
+                available_indices.append(i)
+        available_indices.append(len(self.__comments))
+        options = ["\n" + str(comment) for comment in self.__comments]
+        chosen_index = globals.get_arrow_key_input(options=[*options, "Back"],\
+                                                    available_indices=available_indices)
+        if chosen_index == len(self.__comments):
+            return
+        choice = self.__comments[chosen_index]
+        choice.edit_comment()
+
+        self.__update_file_attributes()
+
     
     def change_end_time(self):
         """the signed in user can change the end time if he/she is the leader of the main project"""
         
     def comments_menu(self):
         """Displays the menu of the available options to do with comments"""
-        options = ["Display Comments" , "Add Comments" , "Remove Comments" , "Edit Comments" , "Back"]
-        available_indices = options
+        options = ["Add Comments" , "Remove Comments" , "Edit Comments" , "Back"]
+        available_indices = list(range(len(options)))
         if globals.signed_in_username not in [*self.__assignees , self.__leader]:
-            available_indices = [0,4]
+            available_indices = [3]
         while True:
-            choice = options[globals.get_arrow_key_input(options=options, available_indice=available_indices)]
+            choice = options[globals.get_arrow_key_input(options=options, available_indices=available_indices,\
+                                                         display=self.display_comments())]
             match choice:
-                case "Display Comments":
-                    self.display_comments()
                 case "Add Comments":
                     self.add_comments()
                 case "Remove Comments":
                     self.remove_comments()
                 case "Edit Comments":
                     self.edit_comments()
-
+                
     def task_menu(self):
         """Displays the main menu of the task and options of what the the user can do"""
         options = ["Edit Title" , "Edit Description" , "Add Assignees" , "Remove Assignees" ,
@@ -192,13 +294,11 @@ class Task:
         available_indices =[]
 
         if self.__leader == globals.signed_in_username :
-            available_indices = options
+            available_indices = list(range(len(options)))
         elif globals.signed_in_username in self.__assignees :
-            available_indices = ["Edit Title" , "Edit Description" ,
-                   "Change The Priority Of The Task" , "Change The Status Of The Task" ,
-                   "Display The History Of The Task" , "Change The Due Date" , "Comments Section" , "Back"]
+            available_indices = [0 , 1, 4 , 5 , 6 , 7 , 8 , 9]
         else :
-            available_indices = ["Display The History Of The Task" , "Comments Section" , "Back"]
+            available_indices = [6 , 8 , 9]
             
         while True:
             choice = options[globals.get_arrow_key_input(options=options, available_indices=available_indices)]
@@ -223,3 +323,7 @@ class Task:
                     self.comments_menu()
                 case "Back" :
                     return
+                
+task = Task([] , "sdkas" , "sdjak" , "asdkja", "today", "tomorrow", "me", [],1,1,"",[])
+
+task.task_menu()
