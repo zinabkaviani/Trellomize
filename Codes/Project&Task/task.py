@@ -39,7 +39,16 @@ class Comment:
 
     def get_user_name(self):
         return self.__user_name
+
+    def get_text(self):
+        return self.__text
     
+    def get_date_of_comment(self):
+        return self.__date_of_comment
+    
+    def get_time_of_comment(self):
+        return self.__time_of_comment
+
     def edit_comment(self):
         """edit the comment sent before"""
         while True:
@@ -106,41 +115,33 @@ class Task:
 
     def edit_title(self):
         """sets a new title for task with input"""
-        while True:
-            input_text = self.__title
-            print("Edit the title (cancel with Esc):")
-            new_title = globals.get_input_with_cancel(input_text)
-            if new_title == "":
-                error_messages =["Error" , "Task title can't be empty ."]
-                globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
-            
-                globals.msvcrt.getch()
-                globals.os.system('cls' if globals.os.name == 'nt' else 'clear')  # Clear the screen
-            elif new_title == None:
-                break
-            else:
-                self.__title = new_title
-                break
-    
+        input_text = self.__title
+        print("Edit the title (cancel with Esc):")
+        new_title = globals.get_input_with_cancel(input_text)
+        if new_title != None:
+            self.__title = new_title
+        self.__update_file_attributes()
+
     def edit_description(self):
         """Set a new description for task with input"""
-        while True:
-            input_text = self.__description
-            print("Edit the description (cancel with Esc):")
-            new_description = globals.get_input_with_cancel(input_text)
-            if new_description == None:
-                break
-            else:
-                self.__description = new_description
-                break
+        input_text = self.__description
+        print("Edit the description (cancel with Esc):")
+        new_description = globals.get_input_with_cancel(input_text)
+        if new_description != None:
+            self.__description = new_description
+        self.__update_file_attributes()
     
     def add_assignees(self):
         """add an assignee for the task"""
-        options = [*self.__candidates_for_assignment , "Back"]
+        options = [*self.__candidates_for_assignment]
+        options.append("Back")
+
         indices_list = []
         for assignee_index in range(len(self.__candidates_for_assignment)):
             if self.__candidates_for_assignment[assignee_index] not in self.__assignees:
                 indices_list.append(assignee_index)
+        indices_list.append(len(options) - 1)
+
         choice = options[globals.get_arrow_key_input(options=options, available_indices= indices_list)]
         if choice != "Back":
             self.__assignees.append(choice)
@@ -148,7 +149,7 @@ class Task:
     
     def remove_assignees(self):
         """remove an assignee from the task"""
-        options = [*self.__candidates_for_assignment , "Back"]
+        options = [*self.__assignees , "Back"]
         indices_list = list(range(len(options)))
         choice = options[globals.get_arrow_key_input(options=options, available_indices=indices_list)]
         #Check if the leader is sure about removing the assignee
@@ -199,6 +200,7 @@ class Task:
 
     def display_history(self):
         """Displays the history of the Task"""
+        #needs logging first
         pass
 
     def update_history(self):
@@ -263,7 +265,7 @@ class Task:
         choice = self.__comments[chosen_index]
         choice.edit_comment()
 
-        self.__update_file_attributes()
+        # self.__update_file_attributes()
 
     
     def change_end_time(self):
@@ -285,6 +287,8 @@ class Task:
                     self.remove_comments()
                 case "Edit Comments":
                     self.edit_comments()
+                case "Back":
+                    return
                 
     def task_menu(self):
         """Displays the main menu of the task and options of what the the user can do"""
@@ -324,6 +328,3 @@ class Task:
                 case "Back" :
                     return
                 
-task = Task([] , "sdkas" , "sdjak" , "asdkja", "today", "tomorrow", "me", [],1,1,"",[])
-
-task.task_menu()
