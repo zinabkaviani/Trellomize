@@ -7,6 +7,7 @@ import random
 import datetime
 import keyboard
 import re
+from .. import register
 
 signed_in_username = "me"
 project_id = None
@@ -146,6 +147,8 @@ def account_section():
             choice = options[globals.get_arrow_key_input(options=options ,available_indices=available_indices)]
 
             if choice == "Register":
-                register()
+                register.register()
             elif choice == "Log in":
-              self.user_login()
+                register.user_login()
+            else :
+                 return
