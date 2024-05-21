@@ -89,48 +89,40 @@ def register():
                      contributing_projects=[],leading_projects=[])
 
 def Log_in():
-
-
-    name, password = input("Enter username or email address(email address correct format : name@gmail.com): "),\
+    name, password = globalinput("Enter username or email address(email address correct format : name@gmail.com): "),\
           input("Enter password: ")
     
+    username = None
+    email_address = None
+
     with open('user.txt', 'r') as file:
             for line in file:
                 username , email_address = line.strip().split(',')        
-    if "@" in name :
-            if  name == email_address :
-                with open(f"Data\\Acounts_Data\\Users\\{username}.json", 'r') as file:
-                   user_data = globals.json.load(file)
-                        
-                if password == user_data["password"]:
-                    return user.User(account=user.Account(username=username , email_address =  user_data["email_address"],\
-                                                                    password=password),contributing_projects=[],leading_projects=[])
-                else :
-                    error_messages =["Error" , "Password is incorrect"]
-                    globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
-            else :
-                error_messages =["Error" , "Email address dose not exist"]
-                globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color="red")
-                 
+                if "@" in name:
+                    if  name == email_address:
+                        with open(f"Data\\Acounts_Data\\Users\\{username}.json", 'r') as file:
+                            user_data = globals.json.load(file)
+                                        
+                        if check_password(entered_password=password ,hashed_password= user_data["password"]):
+                            return user.User(account=user.Account(username=username , email_address =  user_data["email_address"],\
+                                                                    password=encode_password(password)),contributing_projects=[],\
+                                                                    leading_projects=[])
+                        else :
+                            error_messages =["Error" , "Email address or Password is incorrect"]
+                            globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
+                                        
+                else:
+                    if name == username:            
+                        with open(f"Data\\Acounts_Data\\Users\\{username}.json", 'r') as file:
+                            user_data = globals.json.load(file)
+                                        
+                        if check_password(entered_password=password ,hashed_password= user_data["password"]):
+                            return user.User(account=user.Account(username=username , email_address =  user_data["email_address"],\
+                                                                        password=encode_password(password)),contributing_projects=[],\
+                                                                    leading_projects=[])
+                        else:
+                            error_messages =["Error" , "Username or Password is incorrect"]
+                            globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
+                                
                 
-                    
-    else:
-        if name == username :
-                        
-            with open(f"Data\\Acounts_Data\\Users\\{username}.json", 'r') as file:
-                   user_data = globals.json.load(file)
-                        
-            if password == user_data["password"]:
-                return user.User(account=user.Account(username=username , email_address =  user_data["email_address"],\
-                                                                password=password),contributing_projects=[],leading_projects=[])
-            else :
-                error_messages =["Error" , "Password is incorrect"]
-                globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
-        else :
-                error_messages =["Error" , "the Username dose not exist"]
-                globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color="red")
-            
-
-                
-  
 

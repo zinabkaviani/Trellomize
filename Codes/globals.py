@@ -122,14 +122,20 @@ def split_text(text, width):
 
 def account_section():
             
-            options = ["Sign Up", "Log in" , "Exit"]
-            available_indices = [0, 1 , 2]
-            choice = options[globals.get_arrow_key_input(options=options ,available_indices=available_indices)]
-
-            if choice == "Sign Up":
-                register.register()
-            elif choice == "Log in":
-                register.Log_in()
-            else :
-                 return
-            
+    options = ["Sign Up", "Log in" , "Exit"]
+    available_indices = [0, 1 , 2]
+    choice = options[globals.get_arrow_key_input(options=options ,available_indices=available_indices)]
+    user = None
+    while True:
+        if choice == "Sign Up":
+            user = register.register()
+            if user != None:
+               user.user_menu()
+                    
+        elif choice == "Log in":
+            user = register.Log_in()
+            if user != None:
+                user.user_menu()
+        else:
+            return
+                
