@@ -124,7 +124,7 @@ def account_section():
             
     options = ["Sign Up", "Log in" , "Exit"]
     available_indices = [0, 1 , 2]
-    choice = options[globals.get_arrow_key_input(options=options ,available_indices=available_indices)]
+    choice = options[get_arrow_key_input(options=options ,available_indices=available_indices)]
     user = None
     while True:
         if choice == "Sign Up":
