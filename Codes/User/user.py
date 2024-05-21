@@ -3,6 +3,8 @@ import json
 import os
 from .. import globals
 from globals import print_message
+from .. import register
+
 
 class Account:
     
@@ -16,18 +18,10 @@ class Account:
 
     def get_email_address(self):
         return self.__email_address
-
-    @staticmethod
-    def encode_password(password_input):
-        return bcrypt.hashpw(password_input.encode('utf-8'), bcrypt.gensalt())
-    
-    @staticmethod
-    def __check_password(entered_password , hashed_password):
-        return bcrypt.checkpw(entered_password.encode('utf-8'), hashed_password)
-    
+  
     def save_account_data(self):
         account_data = {
-            "password_hash": self.encode_password(self.__password),  # Save the password hash directly as bytes
+            "password_hash": register.encode_password(self.__password),  # Save the password hash directly as bytes
             "email": self.__email_address
         }
         if os.path.exists(f'Data\\Acount_Data\\Acounts\\{self.__username}.json'):
@@ -35,41 +29,23 @@ class Account:
                 json.dump(account_data, file)
 
     def account_setting_menu(self) :
-        option =["Change Email" , "Delete User" , "Sing Out", "Back"]
+        option =["Change Email" , "Delete User" , "Sign Out", "Back"]
+        indices_list = list(range(len(option)))
         while True :
-            choice = globals.get_arrow_key_input(option)
+            choice = option[globals.get_arrow_key_input(option,indices_list)]
             match choice :
                 case "Change Email" :
                     self.change_email(self)
                 case "Delete User" :
                     pass
-                case "Sing Out" :
-                    return "sing out"
+                case "Sign Out" :
+                    return "sign out"
                 case "Back" :
                     return "back"
 
-    def register(self):
-            self.__username = input("Enter username: ")
-            self.__email_address = input("Enter email address: ")
-            self.__password = input("Enter password: ")
-
-            if globals.check_existing_username(self.__username):
-                error_messages = [["Error", "Username already exists."]]
-                print_message(f"{error_messages[0][0]}: {error_messages[0][1]}", color="red")
-            
-            elif globals.check_existing_email(self.__email_address) :
-                error_messages =[["Error" , "Email address already exists."]]
-                print_message(f"{error_messages[0][0]}: {error_messages[0][1]}" , color ="red")
-            
-            else:
-                with open("Data\\Acounts_Data\\users.txt", "a") as file:
-                    file.write(f"{self.__username},{self.__email_address}\n")
-                print_message("Account successfully created.", color="green")
-#import csv
-    
     def change_email(self):
            new_email = input("Enter the new email address: ")
-           if not self.check_existing_username(self.__username):
+           if not register.check_existing_username(self.__username):
                with open("Data\\Acounts_Data\\users.txt", "r") as file:
                    lines = file.readlines()
                with open("Data\\Acounts_Data\\users.txt", "w") as file:
@@ -79,23 +55,17 @@ class Account:
                            file.write(f"{self.__username},{new_email}\n")
                        else:
                            file.write(line)
+                
                print_message("Email address updated successfully.", color="green")
            else:
-               print_message("Username already exists.", color="red")
+               error_messages =["Error" , "Username already exists."]
+               print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
 
-    def register_section(self):
-            options = ["Register", "Change Email"]
-            choice = globals.get_arrow_key_input(options)
 
-            if choice == "Register":
-                self.register()
-    #        elif choice == "Change Email":
-    #           self.change_email()
 
 
 class User:
-    def __init__(self, username , email_address , password , leading_projects, contributing_projects):
-        account = Account(username=username, email_address=email_address, password=password)
+    def __init__(self, account, leading_projects, contributing_projects):
         self.__account = account
         self.__leading_projects = leading_projects
         self.__contributing_projects = contributing_projects
@@ -113,7 +83,9 @@ class User:
     
     def choose_project(self):
         while True:
-            choice = globals.get_arrow_key_input(['Leading projects' , 'Contributing projects' , 'Exit'])
+            options = ['Leading projects' , 'Contributing projects' , 'Exit']
+            available_indices = [0,1,2]
+            choice = options[globals.get_arrow_key_input(options=options , available_indices = available_indices)]
             if choice == 'Leading projects':
                 result = self.choose_leading_projects()
                 if result != None :
@@ -156,9 +128,9 @@ class User:
 
     def user_menu(self) :
         options = ["Display Projects", "Add Project" , "Choose Project" , "Delete Project" , "Account Setting"]
-
+        indices_list = list(range(len(options)))
         while True:
-            choice =globals.get_arrow_key_input(options)
+            choice =options[globals.get_arrow_key_input(options,indices_list)]
             match choice :
 
                 case "Display Projects" :

@@ -6,8 +6,7 @@ import string
 import random
 import datetime
 import keyboard
-import re
-from .. import register
+import register
 
 signed_in_username = "me"
 project_id = None
@@ -44,8 +43,8 @@ def get_arrow_key_input(options, available_indices, display=""):
                 if selected_index is not None:
                     return selected_index
                 else:
-                    error_message =[["Error","No available options to select."]]
-                    print_message(f"{error_message[0][0]}: {error_message[0][1]}",color="red")
+                    error_message =["Error","No available options to select."]
+                    print_message(f"{error_message[0]}: {error_message[1]}",color="red")
 
 def print_message(message, color="white"):
     max_length = len(max(message.split('\n'), key=len))
@@ -60,23 +59,6 @@ def print_message(message, color="white"):
     print(f'│ {colored_message:<{max_length}}       │')  # Removed color from the border
     print('╰' + '─' * (max_length + 8) + '╯')
 
-def check_existing_username(username):
-            if os.path.exists("Data\\Acounts_Data\\users.txt"):
-                with open("Data\\Acounts_Data\\users.txt", "r") as file:
-                    for line in file:
-                        stored_username, _ = line.strip().split(',')
-                        if username == stored_username:
-                            return True
-            return False
-    
-def check_existing_email(email_address):
-            if os.path.exists("Data\\Acounts_Data\\users.txt"):
-                with open("Data\\Acounts_Data\\users.txt", "r") as file:
-                    for line in file:
-                        _ , sorted_email_address = line.strip().split(',')
-                        if email_address == sorted_email_address:
-                            return True
-            return False
 
 def generate_random_id(existing_ids, length= 6):
     while True:
@@ -137,18 +119,17 @@ def split_text(text, width):
                 lines.append(current_line)
             return lines
 
-def check_email_format(email):
-    pattern = r'^[a-zA-Z0-9._%+-]+@gmail\.com$'
-    return re.match(pattern, email) is not None
 
 def account_section():
-            options = ["Register", "Log in" , "Exit"]
+            
+            options = ["Sign Up", "Log in" , "Exit"]
             available_indices = [0, 1 , 2]
             choice = options[globals.get_arrow_key_input(options=options ,available_indices=available_indices)]
 
-            if choice == "Register":
+            if choice == "Sign Up":
                 register.register()
             elif choice == "Log in":
-                register.user_login()
+                register.Log_in()
             else :
                  return
+            
