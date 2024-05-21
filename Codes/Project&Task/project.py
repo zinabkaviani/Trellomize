@@ -32,8 +32,8 @@ class project :
             self.__members.append(member)
             globals.print_message("Member successfully added to project members",color="green")
         else :
-            error_messages =[["Error" , "The user dose not have an account."]]
-            globals.print_message(f"{error_messages[0][0]}: {error_messages[0][1]}" , color ="red")
+            error_messages =["Error" , "The user dose not have an account."]
+            globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
 
     def remove_members(self) :
         """leader can remove members by chosing between members list via arrow key"""
