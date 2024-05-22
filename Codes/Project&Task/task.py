@@ -1,4 +1,4 @@
-import globals
+from .. import globals
 
 from enum import Enum, auto
 
@@ -99,16 +99,16 @@ class Task:
     def __update_file_attributes(self):
         """Updates the Task file with Task attributes"""
         task_data = {
-            "candidates_for_assignment" : self.__candidates_for_assignment,
-            "title" : self.__title,
-            "description" : self.__description,
-            "start_date" : self.__start_date,
-            "end_date" : self.__end_date,
-            "assignees" : self.__assignees,
-            "priority" : self.__priority,
-            "status" : self.__status,
-            "history" : self.__history,
-            "comments" : [comment.__dict__ for comment in self.__comments]
+            "candidates_for_assignment": self.__candidates_for_assignment,
+            "title": self.__title,
+            "description": self.__description,
+            "start_date": self.__start_date,
+            "end_date": self.__end_date,
+            "assignees": self.__assignees,
+            "priority": self.__priority,
+            "status": self.__status,
+            "history": self.__history,
+            "comments": [comment.__dict__ for comment in self.__comments]
         }
         with open(f"Data\\Projects_Data\\{globals.project_id}\\{self.__random_id}.json" , 'w') as file:
             globals.json.dump(task_data , file)
@@ -120,7 +120,7 @@ class Task:
         new_title = globals.get_input_with_cancel(input_text)
         if new_title != None:
             self.__title = new_title
-        self.__update_file_attributes()
+            self.__update_file_attributes()
 
     def edit_description(self):
         """Set a new description for task with input"""
@@ -129,7 +129,7 @@ class Task:
         new_description = globals.get_input_with_cancel(input_text)
         if new_description != None:
             self.__description = new_description
-        self.__update_file_attributes()
+            self.__update_file_attributes()
     
     def add_assignees(self):
         """add an assignee for the task"""
@@ -178,11 +178,11 @@ class Task:
     
     def change_status(self):
         """changes the status of the Task"""
-        options = ["BACK LOG" , "TODO" , "DOING" , "DONE" , "ARCHIVED" , "BACK"]
+        options = ["BACKLOG" , "TODO" , "DOING" , "DONE" , "ARCHIVED" , "BACK"]
         available_indices = [0 , 1 , 2 , 3 , 4 , 5]
         choice = options[globals.get_arrow_key_input(options=options, available_indices=available_indices, display=self)]
         match choice:
-            case "BACK LOG":
+            case "BACKLOG":
                 self.__status =Status.BACKLOG
                 self.__update_file_attributes()
             case "TODO":
@@ -201,12 +201,11 @@ class Task:
     def display_history(self):
         """Displays the history of the Task"""
         #needs logging first
-        pass
 
     def update_history(self):
         """Updates all activities of the leader and assignees"""
-        pass
-
+        
+        
     def display_comments(self):
         """Displays all the comments on the Task"""
         display = ""
@@ -265,12 +264,13 @@ class Task:
         choice = self.__comments[chosen_index]
         choice.edit_comment()
 
-        # self.__update_file_attributes()
+        self.__update_file_attributes()
 
     
     def change_end_time(self):
         """the signed in user can change the end time if he/she is the leader of the main project"""
         
+
     def comments_menu(self):
         """Displays the menu of the available options to do with comments"""
         options = ["Add Comments" , "Remove Comments" , "Edit Comments" , "Back"]
@@ -297,34 +297,34 @@ class Task:
                    "Display The History Of The Task" , "Change The Due Date" , "Comments Section" , "Back"]
         available_indices =[]
 
-        if self.__leader == globals.signed_in_username :
+        if self.__leader == globals.signed_in_username:
             available_indices = list(range(len(options)))
-        elif globals.signed_in_username in self.__assignees :
+        elif globals.signed_in_username in self.__assignees:
             available_indices = [0 , 1, 4 , 5 , 6 , 7 , 8 , 9]
-        else :
+        else:
             available_indices = [6 , 8 , 9]
             
         while True:
             choice = options[globals.get_arrow_key_input(options=options, available_indices=available_indices)]
             match choice:
-                case "Edit Title" :
+                case "Edit Title":
                     self.edit_title()
-                case "Edit Description" :
+                case "Edit Description":
                     self.edit_description()
-                case "Add Assignees" :
+                case "Add Assignees":
                     self.add_assignees()
-                case "Remove Assignees" :
+                case "Remove Assignees":
                     self.remove_assignees()
-                case "Change The Priority Of The Task" :
+                case "Change The Priority Of The Task":
                     self.change_priority()
-                case "Change The Status Of The Task" :
+                case "Change The Status Of The Task":
                     self.change_status()
-                case "Display The History Of The Task" :
+                case "Display The History Of The Task":
                     self.display_history()
-                case "Change The Due Date" :
+                case "Change The Due Date":
                     self.change_end_time()
-                case "Comments Section" :
+                case "Comments Section":
                     self.comments_menu()
-                case "Back" :
+                case "Back":
                     return
                 
