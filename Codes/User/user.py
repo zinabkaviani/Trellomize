@@ -24,8 +24,8 @@ class Account:
             "password_hash": register.encode_password(self.__password),  # Save the password hash directly as bytes
             "email": self.__email_address
         }
-        if os.path.exists(f'Data\\Acount_Data\\Acounts\\{self.__username}.json'):
-            with open(f'Data\\Acount_Data\\Acounts\\{self.__username}.json', 'w') as file:
+        if os.path.exists(f'Data\\Account_Data\\Accounts\\{self.__username}.json'):
+            with open(f'Data\\Account_Data\\Accounts\\{self.__username}.json', 'w') as file:
                 json.dump(account_data, file)
 
     def account_setting_menu(self) :
@@ -46,9 +46,9 @@ class Account:
     def change_email(self):
            new_email = input("Enter the new email address: ")
            if not register.check_existing_username(self.__username):
-               with open("Data\\Acounts_Data\\users.txt", "r") as file:
+               with open("Data\\Accounts_Data\\users.txt", "r") as file:
                    lines = file.readlines()
-               with open("Data\\Acounts_Data\\users.txt", "w") as file:
+               with open("Data\\Accounts_Data\\users.txt", "w") as file:
                   for line in lines:
                        stored_username, _ = line.strip().split(',')
                        if stored_username == self.__username:

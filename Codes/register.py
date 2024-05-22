@@ -5,18 +5,18 @@ import re
 import os
 
 def encode_password(password_input):
-        return bcrypt.hashpw(password_input.encode('utf-8'), bcrypt.gensalt())
+      return bcrypt.hashpw(password_input.encode('utf-8'), bcrypt.gensalt())
     
 def check_password(entered_password , hashed_password):
-        return bcrypt.checkpw(entered_password.encode('utf-8'), hashed_password)
+       return bcrypt.checkpw(entered_password.encode('utf-8'), hashed_password)
 
 def check_email_format(email):
-    pattern = r'^[a-zA-Z0-9._%+-]+@gmail\.com$'
+    pattern = r'^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outlook|hotmail|live|aol)\.com$'
     return re.match(pattern, email) is not None
 
 def check_existing_username(username):
-            if os.path.exists("Data\\Acounts_Data\\users.txt"):
-                with open("Data\\Acounts_Data\\users.txt", "r") as file:
+            if os.path.exists("Data\\Accounts_Data\\users.txt"):
+                with open("Data\\Accounts_Data\\users.txt", "r") as file:
                     for line in file:
                         stored_username, _ = line.strip().split(',')
                         if username == stored_username:
@@ -24,8 +24,8 @@ def check_existing_username(username):
             return False
     
 def check_existing_email(email_address):
-            if os.path.exists("Data\\Acounts_Data\\users.txt"):
-                with open("Data\\Acounts_Data\\users.txt", "r") as file:
+            if os.path.exists("Data\\Accounts_Data\\users.txt"):
+                with open("Data\\Accounts_Data\\users.txt", "r") as file:
                     for line in file:
                         _ , sorted_email_address = line.strip().split(',')
                         if email_address == sorted_email_address:
@@ -38,23 +38,19 @@ def register():
     password = None
     while True:
         print("pree Esc to exit")
-
-        print("Enter username: ")
-        username = globals.get_input_with_cancel()
+        username = globals.get_input_with_cancel(drafted_text="Enter username: ")
         if username == None:
             return
-        
-        print("Enter email address(correct format : name@gmail.com): ")
-        email_address = globals.get_input_with_cancel()
+
+        email_address = globals.get_input_with_cancel(drafted_text="\nEnter email address(correct format : name@(gmail|yahoo|outlook|hotmail|live|aol/.com): ")
         if email_address == None :
             return
-        
-        print("Enter password: ")
-        password = globals.get_input_with_cancel()
+
+        password = globals.get_input_with_cancel(drafted_text="\nEnter password: ")
         if password == None :
             return
         
-        if check_email_format( email_address) :
+        if check_email_format( email_address) == True:
 
             if check_existing_username(username):
                 error_messages = ["Error", "Username already exists."]
@@ -65,7 +61,7 @@ def register():
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
             
             else:
-                with open("Data\\Acounts_Data\\users.txt", "a") as file:
+                with open("Data\\Accounts_Data\\users.txt", "a") as file:
                     file.write(f"{username},{email_address}\n")
                 globals.print_message("Account successfully created.", color="green")
                 password = encode_password(password)
@@ -81,7 +77,7 @@ def register():
         "contributing_projects" : []
     }
     
-    with open(f"Data\\Acounts_Data\\Users\\{username}.json","w" ) as file:
+    with open(f"Data\\Accounts_Data\\Users\\{username}.json","w" ) as file:
         globals.json.dump(data ,file)
     
     
@@ -90,17 +86,17 @@ def register():
 
 def Log_in():
     name, password = globals.get_input_with_cancel("Enter username or email address(email address correct format : name@gmail.com): "),\
-          globals.get_input_with_cancel("Enter password: ")
+          globals.get_input_with_cancel("\nEnter password: ")
     
     user_data = None
 
-    with open('user.txt', 'r') as file:
+    with open("Data\\Accounts_Data\\users.txt", 'r') as file:
         if "@" in name:
             for line in file:
                 username , email_address = line.strip().split(',')        
                 
                 if  name == email_address:
-                    with open(f"Data\\Acounts_Data\\Users\\{username}.json", 'r') as file:
+                    with open(f"Data\\Accounts_Data\\Users\\{username}.json", 'r') as file:
                         user_data = globals.json.load(file)
                                         
                     if check_password(entered_password=password ,hashed_password= user_data["password"]):
@@ -116,7 +112,7 @@ def Log_in():
                 username , email_address = line.strip().split(',')        
                 
                 if name == username:            
-                    with open(f"Data\\Acounts_Data\\Users\\{username}.json", 'r') as file:
+                    with open(f"Data\\Accounts_Data\\Users\\{username}.json", 'r') as file:
                         user_data = globals.json.load(file)
                                         
                 if check_password(entered_password=password ,hashed_password= user_data["password"]):
@@ -129,3 +125,24 @@ def Log_in():
                                 
                 
 
+def account_section():
+            
+    options = ["Sign Up", "Log in" , "Exit"]
+    available_indices = [0, 1 , 2]
+    choice = options[globals.get_arrow_key_input(options=options ,available_indices=available_indices)]
+    user = None
+    while True:
+        if choice == "Sign Up":
+            user = register()
+            if user != None:
+               user.user_menu()
+                    
+        elif choice == "Log in":
+            user = Log_in()
+            if user != None:
+                user.user_menu()
+        else:
+            return
+
+
+account_section()

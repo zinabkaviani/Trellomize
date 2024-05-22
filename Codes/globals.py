@@ -6,7 +6,7 @@ import string
 import random
 import datetime
 import keyboard
-import register
+
 
 signed_in_username = "me"
 project_id = None
@@ -54,7 +54,7 @@ def print_message(message, color="white"):
     reset_color = attr(0)
 
     colored_message = f"{color_code}{message}{reset_color}"  # Apply color to the message
-
+    print("\n")
     print(border)
     print(f'│ {colored_message:<{max_length}}       │')  # Removed color from the border
     print('╰' + '─' * (max_length + 8) + '╯')
@@ -120,22 +120,3 @@ def split_text(text, width):
             return lines
 
 
-def account_section():
-            
-    options = ["Sign Up", "Log in" , "Exit"]
-    available_indices = [0, 1 , 2]
-    choice = options[get_arrow_key_input(options=options ,available_indices=available_indices)]
-    user = None
-    while True:
-        if choice == "Sign Up":
-            user = register.register()
-            if user != None:
-               user.user_menu()
-                    
-        elif choice == "Log in":
-            user = register.Log_in()
-            if user != None:
-                user.user_menu()
-        else:
-            return
-                
