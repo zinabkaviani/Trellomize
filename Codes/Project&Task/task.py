@@ -96,6 +96,8 @@ class Task:
         self.__history = history
         self.__comments = comments
 
+    def __str__(self) -> str:
+        pass
     def __update_file_attributes(self):
         """Updates the Task file with Task attributes"""
         task_data = {

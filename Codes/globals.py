@@ -67,11 +67,14 @@ def get_arrow_key_input(options, available_indices, display=""):
                     error_message =["Error","No available options to select."]
                     print_message(f"{error_message[0]}: {error_message[1]}",color="red")
 
-def print_message(message, color="RESET"):
+def print_message(message, color= "reset"):
     max_length = len(max(message.split('\n'), key=len))
     border = '╭' + '─' * (max_length + 8) + '╮'
-
-    color_code = fg(color)
+    color_code = None
+    if color == "reset":
+        color_code = attr(0)
+    else:
+        color_code = fg(color)
     reset_color = attr(0)
 
     colored_message = f"{color_code}{message}{reset_color}"  # Apply color to the message
@@ -146,31 +149,35 @@ def create_project_table(headers,data):
     col_widths = [max(len(str(item)) for item in col)for col in zip(*columns)]
 
     def create_row(items,sep = vline):
-        row = sep+ sep.join(f"{str(item).ljust(col_widths[i])}"for i , item in enumerate(items)) + sep
+        row = sep+ sep.join(f" {str(item).center(col_widths[i])} "for i , item in enumerate(items)) + sep 
         return row
     
     def create_separator(left , mid  , right):
         separator = left +mid.join(hline * (width + 2) for width in col_widths) + right
+        return separator
 
     header_top_border = GREEN + tl + tj.join(hline * (w + 2) for w in col_widths) + tr + RESET
     header_row = GREEN + create_row(headers) + RESET
     header_middle_separator = GREEN + bl + bj.join(hline * (w + 2) for w in col_widths) + br + RESET
 
     data_top_border = create_separator(tl, tj, tr)
-
+    bottom_border = create_separator(bl, bj, br)
+    
+    table = []
+    
     data_rows = []
     for row in data:
         data_rows.append(create_row(row))
         data_rows.append(create_separator(lj, mj, rj))
-    data_rows.pop()
-
-    bottom_border = create_separator(bl, bj, br)
-
-    table = [
+    if data_rows != []:
+        data_rows.pop()
+        table = [
         header_top_border, header_row, header_middle_separator,
         data_top_border
     ] + data_rows + [bottom_border]
     
+    else :
+        table = [header_top_border, header_row, header_middle_separator] 
     return '\n'.join(table)
 
 
@@ -185,8 +192,8 @@ def create_status_table(status, tasks, table_width):
     }
     color = color_map.get(status.value, RESET)
 
-    headers = ["Task", "Leader","Priority","Description"]
-    data = [[task["title"], task["leader"],task["priority"],task["description"]] for task in tasks]
+    headers = ["Task","Priority","Leader","Description"]
+    data = [[task["title"],task["priority"], task["leader"],task["description"]] for task in tasks]
 
     col_widths = [max(len(str(item)) for item in col) for col in zip(*[headers] + data)]
 

@@ -56,7 +56,7 @@ class project :
         """display tasks of the project"""
         all_tasks =[]
         for task in self.__tasks:
-            with open(f'Data\\Projects_Data\\{project}.json', 'r') as file:
+            with open(f'Data\\Projects_Data\\{self.__id}\\{self.__id}.json', 'r') as file:
                 data = globals.json.load(file)
                 for task in data:      
                     task_data = [task["id"],task["title"],task["leader"],task["description"],task["status"],task["priority"]]

@@ -6,6 +6,15 @@ from globals import print_message
 from .. import register
 
 
+def check_existing_username(username):
+            if os.path.exists("Data\\Accounts_Data\\users.txt"):
+                with open("Data\\Accounts_Data\\users.txt", "r") as file:
+                    for line in file:
+                        stored_username, _ = line.strip().split(',')
+                        if username == stored_username:
+                            return True
+            return False
+
 class Account:
     
     def __init__(self, username="", email_address="" , password = ""):
@@ -21,7 +30,7 @@ class Account:
   
     def save_account_data(self):
         account_data = {
-            "password_hash": register.encode_password(self.__password),  # Save the password hash directly as bytes
+            "password_hash":self.__password,  # Save the password hash directly as bytes
             "email": self.__email_address
         }
         if os.path.exists(f'Data\\Account_Data\\Accounts\\{self.__username}.json'):
@@ -45,7 +54,7 @@ class Account:
 
     def change_email(self):
            new_email = input("Enter the new email address: ")
-           if not register.check_existing_username(self.__username):
+           if not check_existing_username(self.__username):
                with open("Data\\Accounts_Data\\users.txt", "r") as file:
                    lines = file.readlines()
                with open("Data\\Accounts_Data\\users.txt", "w") as file:
@@ -78,7 +87,7 @@ class User:
     def display_projects(self):
         
         """opens the files of both types of projects the user has and then show the details somehow"""
-        globals.print_message("Leading Projects") 
+        globals.print_message(message="Leading Projects",color="reset") 
         all_leading_projects_data =[]         
         for project in self.__contributing_projects:
             with open(f'Data\\Projects_Data\\{project}.json', 'r') as file:
@@ -86,8 +95,8 @@ class User:
                 for project in data:      
                     project_data = [project["id"],project["title"],project["leader"]]
                     all_leading_projects_data.append(project_data)
-        
-        print(globals.create_project_table(all_leading_projects_data))
+        headers=["ID","Title","Leader"]
+        print(globals.create_project_table(headers=headers,data=all_leading_projects_data))
         
         
         globals.print_message("Contibuting Projects") 
@@ -98,9 +107,9 @@ class User:
                 for project in data:      
                     project_data = [project["id"],project["title"],project["leader"]]
                     all_contibuting_projects_data.append(project_data)
+        headers=["ID","Title","Leader"]
+        print(globals.create_project_table(headers=headers,data=all_contibuting_projects_data))
         
-        print(globals.create_project_table(all_contibuting_projects_data))
-
     
     def choose_project(self):
         while True:
@@ -167,7 +176,7 @@ class User:
                     self.delete_project()
 
                 case "Account Setting" :
-                    selected_option =  self.__account.account_setting()
+                    selected_option =  self.__account.account_setting_menu()
                     if selected_option == "sign out" :
                         del self
                         return 
