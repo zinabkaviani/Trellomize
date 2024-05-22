@@ -185,11 +185,9 @@ def create_status_table(status, tasks, table_width):
     }
     color = color_map.get(status.value, RESET)
 
-    # Prepare headers and data
     headers = ["Task", "Leader","Priority","Description"]
     data = [[task["title"], task["leader"],task["priority"],task["description"]] for task in tasks]
 
-    # Determine the width of each column
     col_widths = [max(len(str(item)) for item in col) for col in zip(*[headers] + data)]
 
     def create_row(items, color, sep=vline):
@@ -200,31 +198,21 @@ def create_status_table(status, tasks, table_width):
         separator = color + left + mid.join(hline * (w + 2) for w in col_widths) + right + RESET
         return separator
 
-    # Create the status label with border
     status_label = f" {status.value} "
     status_border = color + tl + hline * (table_width - len(status_label)) + status_label + tr + RESET
     status_down_border = color + bl + hline * (table_width ) + br + RESET
-    # Create the top border for the header
     header_top_border = tl + tj.join(hline * (w + 2) for w in col_widths) + tr
 
-    # Create the header row
     header_row = create_row(headers, RESET)
-
-    # Create the middle separator for the header
     header_middle_separator = lj + bj.join(hline * (w + 2) for w in col_widths) + rj
-    # Create the data rows with separators in between
     data_rows = []
     for row in data:
         data_rows.append(create_row(row, color))
         data_rows.append(create_separator(lj, mj, rj, color))
-    # Remove the last middle separator
     if data_rows:
         data_rows.pop()
 
-    # Create the bottom border for the data rows
     bottom_border = create_separator(bl, bj, br, color)
-
-    # Combine all parts
     table = [
         status_border,status_down_border,
         header_top_border, header_row,header_middle_separator,
