@@ -38,7 +38,8 @@ def register():
     password = None
     while True:
         print("pree Esc to exit")
-        username = globals.get_input_with_cancel(drafted_text="Enter username: ")
+        print("\nEnter username: ")
+        username = globals.get_input_with_cancel()
         if username == None:
             return
         print("\nEnter email address(correct format : name@(gmail|yahoo|outlook|hotmail|live|aol/.com): ")
@@ -86,9 +87,11 @@ def register():
 
 def Log_in():
     print("Enter username or email address(email address correct format : name@(gmail|yahoo|outlook|hotmail|live|aol.com): ")
-    name, password = globals.get_input_with_cancel(),\
-          globals.get_input_with_cancel("\nEnter password: ")
-    
+    name = globals.get_input_with_cancel()
+    print("\nEnter password: ")
+    password = globals.get_input_with_cancel()
+    if name == None or password ==  None :
+        return 
     user_data = None
 
     with open("Data\\Accounts_Data\\users.txt", 'r') as file:

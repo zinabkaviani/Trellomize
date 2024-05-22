@@ -1,4 +1,4 @@
-from .. import globals
+from .. import globals,register
 import task
 
 class project :
@@ -28,7 +28,7 @@ class project :
     def add_member(self) :
         """leader can add members via username"""
         member = globals.get_input_with_cancel("Please inter member's username to add :")
-        if globals.check_existing_username(member) :
+        if register.check_existing_username(member) :
             self.__members.append(member)
             globals.print_message("Member successfully added to project members",color="green")
         else :
@@ -54,9 +54,31 @@ class project :
             
     def dispaly_tasks(self) :
         """display tasks of the project"""
-
-        pass
-
+        all_tasks =[]
+        for task in self.__tasks:
+            with open(f'Data\\Projects_Data\\{project}.json', 'r') as file:
+                data = globals.json.load(file)
+                for task in data:      
+                    task_data = [task["id"],task["title"],task["leader"],task["description"],task["status"],task["priority"]]
+                    all_tasks.append(task_data)
+        
+        status_tables = self.display_tables_by_status(all_tasks)
+        for table in status_tables.items():
+            print(table)
+        
+    
+    def display_tables_by_status(tasks):
+        status_tables = {}
+        max_table_width = 0
+        for status in task.Status:
+            tasks_by_status = [task for task in tasks if task["status"] == status]
+            if tasks_by_status:
+                max_backlog_width = 15
+                table = globals.create_status_table(status,tasks_by_status,max_backlog_width)
+                status_tables[status] = table
+                max_table_width = max(max_table_width, len(table.split('\n')[2]))
+        return status_tables
+    
     def add_tasks(self) :
         """leader can add tasks and allocates them to members """
         title = globals.get_input_with_cancel("Please inter a title for the task : ")

@@ -7,6 +7,27 @@ import random
 import datetime
 import keyboard
 
+    # Unicode characters for rounded corners and lines
+tl = '╭' # top-left
+tr = '╮' # top-right
+bl = '╰' # bottom-left
+br = '╯' # bottom-right
+hline = '─' # horizontal line
+vline = '│' # vertical line
+tj = '┬' # top join
+bj = '┴' # bottom join
+mj = '┼' # middle join
+lj = '├' # left join
+rj = '┤' # right join
+
+    # ANSI escape codes for colors
+RED = '\033[91m'
+YELLOW = '\033[93m' 
+CYAN = '\033[96m'
+GRAY = '\033[90m'
+GREEN = '\033[92m'
+RESET = '\033[0m'
+
 
 signed_in_username = "me"
 project_id = None
@@ -24,7 +45,7 @@ def get_arrow_key_input(options, available_indices, display=""):
         print("Use arrow keys to select:")
         for idx, option in enumerate(options):
             if idx == selected_index:
-                print("\033[1;32;40m" + f"> {option}" + "\033[m")  # Highlight the selected option in green
+                print("\033[1;32;40m" + f"> {option}" + "\033[m")  # Highlight the selected option in GREEN
             elif idx in available_indices:
                 print(f"  {option}")
             else:
@@ -46,7 +67,7 @@ def get_arrow_key_input(options, available_indices, display=""):
                     error_message =["Error","No available options to select."]
                     print_message(f"{error_message[0]}: {error_message[1]}",color="red")
 
-def print_message(message, color="white"):
+def print_message(message, color="RESET"):
     max_length = len(max(message.split('\n'), key=len))
     border = '╭' + '─' * (max_length + 8) + '╮'
 
@@ -75,7 +96,7 @@ def get_current_time() :
     return formatted_time
 
 def get_added_time(start_time , **keyword) :
-    end_time = start_time + datetime.timedelta(**keyword)
+    end_time = start_time + str(datetime.timedelta(**keyword))
     return end_time
 
 def get_input_with_cancel(drafted_text = ""):
@@ -118,5 +139,97 @@ def split_text(text, width):
             if current_line:
                 lines.append(current_line)
             return lines
+
+def create_project_table(headers,data):
+
+    columns =[headers] + data
+    col_widths = [max(len(str(item)) for item in col)for col in zip(*columns)]
+
+    def create_row(items,sep = vline):
+        row = sep+ sep.join(f"{str(item).ljust(col_widths[i])}"for i , item in enumerate(items)) + sep
+        return row
+    
+    def create_separator(left , mid  , right):
+        separator = left +mid.join(hline * (width + 2) for width in col_widths) + right
+
+    header_top_border = GREEN + tl + tj.join(hline * (w + 2) for w in col_widths) + tr + RESET
+    header_row = GREEN + create_row(headers) + RESET
+    header_middle_separator = GREEN + bl + bj.join(hline * (w + 2) for w in col_widths) + br + RESET
+
+    data_top_border = create_separator(tl, tj, tr)
+
+    data_rows = []
+    for row in data:
+        data_rows.append(create_row(row))
+        data_rows.append(create_separator(lj, mj, rj))
+    data_rows.pop()
+
+    bottom_border = create_separator(bl, bj, br)
+
+    table = [
+        header_top_border, header_row, header_middle_separator,
+        data_top_border
+    ] + data_rows + [bottom_border]
+    
+    return '\n'.join(table)
+
+
+def create_status_table(status, tasks, table_width):
+   
+    color_map = {
+        "Backlog": RED,
+        "To Do": YELLOW,
+        "Doing":CYAN,
+        "Done": GREEN,
+        "Archived":GRAY
+    }
+    color = color_map.get(status.value, RESET)
+
+    # Prepare headers and data
+    headers = ["Task", "Leader","Priority","Description"]
+    data = [[task["title"], task["leader"],task["priority"],task["description"]] for task in tasks]
+
+    # Determine the width of each column
+    col_widths = [max(len(str(item)) for item in col) for col in zip(*[headers] + data)]
+
+    def create_row(items, color, sep=vline):
+        row = color + sep + sep.join(f' {str(item).ljust(col_widths[i])} ' for i, item in enumerate(items)) + sep + RESET
+        return row
+
+    def create_separator(left, mid, right, color=RESET):
+        separator = color + left + mid.join(hline * (w + 2) for w in col_widths) + right + RESET
+        return separator
+
+    # Create the status label with border
+    status_label = f" {status.value} "
+    status_border = color + tl + hline * (table_width - len(status_label)) + status_label + tr + RESET
+    status_down_border = color + bl + hline * (table_width ) + br + RESET
+    # Create the top border for the header
+    header_top_border = tl + tj.join(hline * (w + 2) for w in col_widths) + tr
+
+    # Create the header row
+    header_row = create_row(headers, RESET)
+
+    # Create the middle separator for the header
+    header_middle_separator = lj + bj.join(hline * (w + 2) for w in col_widths) + rj
+    # Create the data rows with separators in between
+    data_rows = []
+    for row in data:
+        data_rows.append(create_row(row, color))
+        data_rows.append(create_separator(lj, mj, rj, color))
+    # Remove the last middle separator
+    if data_rows:
+        data_rows.pop()
+
+    # Create the bottom border for the data rows
+    bottom_border = create_separator(bl, bj, br, color)
+
+    # Combine all parts
+    table = [
+        status_border,status_down_border,
+        header_top_border, header_row,header_middle_separator,
+    ] + data_rows + [bottom_border]
+    
+    return '\n'.join(table)
 
 
