@@ -41,8 +41,8 @@ def register():
         username = globals.get_input_with_cancel(drafted_text="Enter username: ")
         if username == None:
             return
-
-        email_address = globals.get_input_with_cancel(drafted_text="\nEnter email address(correct format : name@(gmail|yahoo|outlook|hotmail|live|aol/.com): ")
+        print("\nEnter email address(correct format : name@(gmail|yahoo|outlook|hotmail|live|aol/.com): ")
+        email_address = globals.get_input_with_cancel()
         if email_address == None :
             return
 
@@ -85,7 +85,8 @@ def register():
                      contributing_projects=[],leading_projects=[])
 
 def Log_in():
-    name, password = globals.get_input_with_cancel("Enter username or email address(email address correct format : name@gmail.com): "),\
+    print("Enter username or email address(email address correct format : name@(gmail|yahoo|outlook|hotmail|live|aol.com): ")
+    name, password = globals.get_input_with_cancel(),\
           globals.get_input_with_cancel("\nEnter password: ")
     
     user_data = None
