@@ -56,10 +56,10 @@ class Account:
                        else:
                            file.write(line)
                 
-               print_message("Email address updated successfully.", color="green")
+               globals.print_message("Email address updated successfully.", color="green")
            else:
                error_messages =["Error" , "Username already exists."]
-               print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
+               globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
 
 
 
@@ -76,10 +76,31 @@ class User:
         self.__contributing_projects = None
     
     def display_projects(self):
-        #opens the files of both types of projects the user has and then show the details somehow
-        #some features can be added such as choosing a project and showing more details about it without
-        #going into the project (making an object)
-        pass
+        
+        """opens the files of both types of projects the user has and then show the details somehow"""
+        globals.print_message("Leading Projects") 
+        all_leading_projects_data =[]         
+        for project in self.__contributing_projects:
+            with open(f'Data\\Projects_Data\\{project}.json', 'r') as file:
+                data = json.load(file)
+                for project in data:      
+                    project_data = [project["id"],project["title"],project["leader"]]
+                    all_leading_projects_data.append(project_data)
+        
+        print(globals.create_project_table(all_leading_projects_data))
+        
+        
+        globals.print_message("Contibuting Projects") 
+        all_contibuting_projects_data =[]         
+        for project in self.__contributing_projects:
+            with open(f'Data\\Projects_Data\\{project}.json', 'r') as file:
+                data = json.load(file)
+                for project in data:      
+                    project_data = [project["id"],project["title"],project["leader"]]
+                    all_contibuting_projects_data.append(project_data)
+        
+        print(globals.create_project_table(all_contibuting_projects_data))
+
     
     def choose_project(self):
         while True:
