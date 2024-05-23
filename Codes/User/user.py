@@ -67,12 +67,13 @@ class Account:
                            file.write(line)
                 
                 globals.print_message("Email address updated successfully.", color="green")
+                globals.getch()
             else:
                 error_messages =["Error" , "Email address already exists."]
                 if new_email == self.__email_address:
                     error_messages = ["Error" , "This is your Email address"]
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
-
+                globals.getch()
 
 
 
@@ -100,7 +101,8 @@ class User:
     def display_projects(self):
         
         """opens the files of both types of projects the user has and then show the details somehow"""
-        globals.print_message(message="Leading Projects",color="reset") 
+        globals.print_message(message="Leading Projects",color="reset")
+        globals.getch()
         all_leading_projects_data =[]         
         for project in self.__contributing_projects:
             with open(f'Data\\Projects_Data\\{project}\\{project}.json', 'r') as file:
@@ -112,7 +114,8 @@ class User:
         print(globals.create_project_table(headers=headers,data=all_leading_projects_data))
         
         
-        globals.print_message("Contibuting Projects") 
+        globals.print_message("Contibuting Projects")
+        globals.getch() 
         all_contibuting_projects_data =[]         
         for project in self.__contributing_projects:
             with open(f'Data\\Projects_Data\\{project}\\{project}.json', 'r') as file:

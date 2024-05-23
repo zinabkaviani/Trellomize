@@ -16,23 +16,23 @@ def check_email_format(email):
     return re.match(pattern, email) is not None
 
 def check_existing_username(username):
-            if os.path.exists("Data\\Accounts_Data\\users.txt"):
-                with open("Data\\Accounts_Data\\users.txt", "r") as file:
-                    for line in file:
-                        stored_username, _ = line.strip().split(',')
-                        if username == stored_username:
-                            return True
-            return False
+    if os.path.exists("Data\\Accounts_Data\\users.txt"):
+        with open("Data\\Accounts_Data\\users.txt", "r") as file:
+            for line in file:
+                stored_username, _ = line.strip().split(',')
+                if username == stored_username:
+                    return True
+        return False
 
 
 def check_existing_email(email_address):
-            if os.path.exists("Data\\Accounts_Data\\users.txt"):
-                with open("Data\\Accounts_Data\\users.txt", "r") as file:
-                    for line in file:
-                        user_name , sorted_email_address = line.strip().split(',')
-                        if email_address == sorted_email_address:
-                            return True
-            return False
+    if os.path.exists("Data\\Accounts_Data\\users.txt"):
+        with open("Data\\Accounts_Data\\users.txt", "r") as file:
+            for line in file:
+                user_name , sorted_email_address = line.strip().split(',')
+                if email_address == sorted_email_address:
+                    return True
+        return False
 
 def register():
 
@@ -61,22 +61,24 @@ def register():
             if check_existing_username(username):
                 error_messages = ["Error", "Username already exists."]
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
+                globals.getch()
             
             elif check_existing_email(email_address) :
                 error_messages =["Error" , "Email address already exists."]
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
-            
+                globals.getch()
             else:
                 with open("Data\\Accounts_Data\\users.txt", "a") as file:
                     file.write(f"{username},{email_address}\n")
                 globals.print_message("Account successfully created.", color="green")
+                globals.getch()
                 password = encode_password(password)
                 password = password.decode('utf8')
                 break
         else :
             error_messages =["Error" , "Email format is incorrect."]
             globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
-
+            globals.getch()
 
     
     data = {
@@ -126,6 +128,7 @@ def Log_in():
                 if user_data["is_active"] == 1:
                     error_messages = ["Banned" , "Your account has been deactivated by the admin"]
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
+                globals.getch()
                 
                                             
             else:
@@ -146,6 +149,7 @@ def Log_in():
                 if user_data["is_active"] == 1:
                     error_messages = ["Banned" , "Your account has been deactivated by the admin"]
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
+                globals.getch()
                                 
                 
 

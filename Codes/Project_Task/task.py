@@ -57,7 +57,7 @@ class Comment:
             if new_text == "":
                 error_messages =["Error" , "Comments can't be empty.(press anything to continue)"]
                 globals.print_message(message=f"{error_messages[0]}: {error_messages[1]}" , color ="red")
-                globals.msvcrt.getch()
+                globals.getch()
             elif new_text == None:
                 break
             else:
