@@ -1,7 +1,7 @@
 from .. import globals,register
 import task
 
-class project :
+class Project :
     def __init__(self, id , title ,members ,leader , tasks ):
         self.__id = id
         self.__title = title
