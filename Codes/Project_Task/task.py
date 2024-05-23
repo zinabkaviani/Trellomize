@@ -96,8 +96,27 @@ class Task:
         self.__history = history
         self.__comments = comments
 
-    def __str__(self) -> str:
-        pass
+    def __str__(self):
+        """Shows the task details in a nice format"""
+        box_width = 50
+        upper_line = '╭' + '-' * (box_width - 2) + '╮'
+        lower_line = '╰' + '-' * (box_width - 2) + '╯'
+
+        formatted_task = ''
+        formatted_task += upper_line + '\n'
+        formatted_task += '| {0:<47}|\n'.format("Task: " + self.__title)
+        formatted_task += '| {0:<47}|\n'.format("ID: " + self.__random_id)
+        formatted_task += '| {0:<47}|\n'.format("Description: " + self.__description)
+        formatted_task += '| {0:<47}|\n'.format("Start Date: " + self.__start_date)
+        formatted_task += '| {0:<47}|\n'.format("End Date: " + (self.__end_date if self.__end_date else "Not set"))
+        formatted_task += '| {0:<47}|\n'.format("Leader: " + self.__leader)
+        formatted_task += '| {0:<47}|\n'.format("Assignees: " + ', '.join(self.__assignees))
+        formatted_task += '| {0:<47}|\n'.format("Priority: " + str(self.__priority))
+        formatted_task += '| {0:<47}|\n'.format("Status: " + str(self.__status))
+
+        formatted_task += lower_line + '\n'
+
+        return formatted_task
     def __update_file_attributes(self):
         """Updates the Task file with Task attributes"""
         task_data = {

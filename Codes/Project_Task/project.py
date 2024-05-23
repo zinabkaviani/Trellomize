@@ -20,7 +20,23 @@ class Project :
         self.__members = members
         self.__leader = leader 
         self.__tasks = tasks
+    
+
+    def __str__(self):
+        box_width = 50
+        upper_line = '╭' + '-' * (box_width - 2) + '╮'
+        lower_line = '╰' + '-' * (box_width - 2) + '╯'
+
+        formatted_project = ''
+        formatted_project += upper_line + '\n'
+        formatted_project += '| {0:<47}|\n'.format("Project ID: " + str(self.__id))
+        formatted_project += '| {0:<47}|\n'.format("Title: " + self.__title)
+        formatted_project += '| {0:<47}|\n'.format("Members: " + ', '.join(self.__members))
+        formatted_project += '| {0:<47}|\n'.format("Leader: " + self.__leader)
         
+        formatted_project += lower_line + '\n'
+
+        return formatted_project
     def __update_file_attributes(self):
         data = {
             "id": self.__id,
