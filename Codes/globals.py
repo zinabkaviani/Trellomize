@@ -26,9 +26,9 @@ RED = '\033[91m'
 YELLOW = '\033[93m' 
 CYAN = '\033[96m'
 GRAY = '\033[90m'
+TURQUOISE = '\033[38;5;45m'
 GREEN = '\033[92m'
 RESET = '\033[0m'
-
 
 signed_in_username = "me"
 project_id = None
@@ -182,19 +182,18 @@ def create_project_table(headers,data):
     return '\n'.join(table)
 
 
-def create_status_table(status, tasks, table_width):
-   
-    color_map = {
-        "Backlog": RED,
-        "To Do": YELLOW,
-        "Doing":CYAN,
-        "Done": GREEN,
-        "Archived":GRAY
+def create_status_table(status, tasks):
+ 
+    # Color mapping based on priority
+    priority_color_map = {
+        "Low": TURQUOISE,
+        "Medium": GREEN,
+        "High": YELLOW,
+        "Critical": RED,
     }
-    color = color_map.get(status.value, RESET)
 
-    headers = ["Task","Priority","Leader","Description"]
-    data = [[task["title"],task["priority"], task["leader"],task["description"]] for task in tasks]
+    headers = ["ID","Title", "Priority", "Leader", "Description"]
+    data = [[task[0],task[1], task[5], task[2], task[3]] for task in tasks]
 
     col_widths = [max(len(str(item)) for item in col) for col in zip(*[headers] + data)]
 
@@ -206,26 +205,39 @@ def create_status_table(status, tasks, table_width):
         separator = color + left + mid.join(hline * (w + 2) for w in col_widths) + right + RESET
         return separator
 
-    status_label = f" {status.value} "
-    status_border = color + tl + hline * (table_width - len(status_label)) + status_label + tr + RESET
-    status_down_border = color + bl + hline * (table_width ) + br + RESET
-    header_top_border = tl + tj.join(hline * (w + 2) for w in col_widths) + tr
-
+    status_label = f" Status: {status.value} "
+    status_border = tl + status_label + hline * (sum(col_widths) + 3 * len(col_widths) - len(status_label) - 1) + tr
+    header_top_border = create_separator(tl, tj, tr)
     header_row = create_row(headers, RESET)
-    header_middle_separator = lj + bj.join(hline * (w + 2) for w in col_widths) + rj
+    header_middle_separator = create_separator(lj, mj, rj, RESET)
+
     data_rows = []
     for row in data:
+        color = priority_color_map.get(row[1], RESET)
         data_rows.append(create_row(row, color))
         data_rows.append(create_separator(lj, mj, rj, color))
     if data_rows:
         data_rows.pop()
 
-    bottom_border = create_separator(bl, bj, br, color)
+    bottom_border = create_separator(bl, bj, br)
+
     table = [
-        status_border,status_down_border,
-        header_top_border, header_row,header_middle_separator,
+        status_border, header_top_border, header_row, header_middle_separator,
     ] + data_rows + [bottom_border]
-    
+
     return '\n'.join(table)
 
-
+def justify_input(input_string, length=10):
+    if isinstance(input_string, list):
+        justified_items = []
+        for item in input_string:
+            if len(item) <= length:
+                justified_items.append(item.ljust(length))
+            else:
+                justified_items.append(item[:length - 3] + '...')
+        return justified_items
+    else:
+        if len(input_string) <= length:
+            return input_string.ljust(length)
+        else:
+            return input_string[:length - 3] + '...'
