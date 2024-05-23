@@ -1,4 +1,4 @@
-from .. import globals
+import globals
 
 from enum import Enum, auto
 
