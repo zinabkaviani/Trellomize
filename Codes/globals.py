@@ -67,6 +67,7 @@ def get_arrow_key_input(options, available_indices, display=""):
                 else:
                     error_message =["Error","No available options to select."]
                     print_message(f"{error_message[0]}: {error_message[1]}",color="red")
+                    getch()
 
 def print_message(message, color= "reset"):
     max_length = len(max(message.split('\n'), key=len))
@@ -241,3 +242,8 @@ def justify_input(input_string, length=10):
             return input_string.ljust(length)
         else:
             return input_string[:length - 3] + '...'
+
+def getch():
+    """Get a single character from standard input. Does not echo to the screen."""
+    return msvcrt.getch().decode('utf-8')
+
