@@ -1,19 +1,27 @@
-import bcrypt
 import json
 import os
-from .. import globals
+import globals
 from globals import print_message
-from .. import register
 
 
 def check_existing_username(username):
+    if os.path.exists("Data\\Accounts_Data\\users.txt"):
+        with open("Data\\Accounts_Data\\users.txt", "r") as file:
+            for line in file:
+                stored_username, _ = line.strip().split(',')
+                if username == stored_username:
+                    return True
+    return False
+
+def check_existing_email(email_address):
             if os.path.exists("Data\\Accounts_Data\\users.txt"):
                 with open("Data\\Accounts_Data\\users.txt", "r") as file:
                     for line in file:
-                        stored_username, _ = line.strip().split(',')
-                        if username == stored_username:
+                        user_name , sorted_email_address = line.strip().split(',')
+                        if email_address == sorted_email_address:
                             return True
             return False
+
 
 class Account:
     
@@ -27,15 +35,6 @@ class Account:
 
     def get_email_address(self):
         return self.__email_address
-  
-    def save_account_data(self):
-        account_data = {
-            "password_hash":self.__password,  # Save the password hash directly as bytes
-            "email": self.__email_address
-        }
-        if os.path.exists(f'Data\\Account_Data\\Accounts\\{self.__username}.json'):
-            with open(f'Data\\Account_Data\\Accounts\\{self.__username}.json', 'w') as file:
-                json.dump(account_data, file)
 
     def account_setting_menu(self) :
         option =["Change Email" , "Delete User" , "Sign Out", "Back"]
@@ -44,7 +43,8 @@ class Account:
             choice = option[globals.get_arrow_key_input(option,indices_list)]
             match choice :
                 case "Change Email" :
-                    self.change_email(self)
+                    self.change_email()
+                    return "email changed"
                 case "Delete User" :
                     pass
                 case "Sign Out" :
@@ -53,22 +53,25 @@ class Account:
                     return "back"
 
     def change_email(self):
-           new_email = input("Enter the new email address: ")
-           if not check_existing_username(self.__username):
-               with open("Data\\Accounts_Data\\users.txt", "r") as file:
-                   lines = file.readlines()
-               with open("Data\\Accounts_Data\\users.txt", "w") as file:
-                  for line in lines:
-                       stored_username, _ = line.strip().split(',')
-                       if stored_username == self.__username:
-                           file.write(f"{self.__username},{new_email}\n")
-                       else:
+            print("Enter the new email address: ")
+            new_email = globals.get_input_with_cancel()
+            if not check_existing_email(new_email):
+                with open("Data\\Accounts_Data\\users.txt", "r") as file:
+                    lines = file.readlines()
+                with open("Data\\Accounts_Data\\users.txt", "w") as file:
+                    for line in lines:
+                        stored_username, _ = line.strip().split(',')
+                        if stored_username == self.__username:
+                            file.write(f"{self.__username},{new_email}\n")
+                        else:
                            file.write(line)
                 
-               globals.print_message("Email address updated successfully.", color="green")
-           else:
-               error_messages =["Error" , "Username already exists."]
-               globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
+                globals.print_message("Email address updated successfully.", color="green")
+            else:
+                error_messages =["Error" , "Email address already exists."]
+                if new_email == self.__email_address:
+                    error_messages = ["Error" , "This is your Email address"]
+                globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
 
 
 
@@ -84,13 +87,23 @@ class User:
         self.__leading_projects = None
         self.__contributing_projects = None
     
+    def __update_file_attributes(self):
+        user_data = {
+            "account": self.__account.__dict__,
+            "leading_projects": self.__leading_projects,
+            "contributing_projects": self.__contributing_projects,
+            "is_active": True
+        }
+        with open(f"Data\\Accounts_Data\\Usera\\{self.__account.get_username()}.json" , "w") as file:
+            json.dump(user_data , file)
+    
     def display_projects(self):
         
         """opens the files of both types of projects the user has and then show the details somehow"""
         globals.print_message(message="Leading Projects",color="reset") 
         all_leading_projects_data =[]         
         for project in self.__contributing_projects:
-            with open(f'Data\\Projects_Data\\{project}.json', 'r') as file:
+            with open(f'Data\\Projects_Data\\{project}\\{project}.json', 'r') as file:
                 data = json.load(file)
                 for project in data:      
                     project_data = [project["id"],project["title"],project["leader"]]
@@ -102,7 +115,7 @@ class User:
         globals.print_message("Contibuting Projects") 
         all_contibuting_projects_data =[]         
         for project in self.__contributing_projects:
-            with open(f'Data\\Projects_Data\\{project}.json', 'r') as file:
+            with open(f'Data\\Projects_Data\\{project}\\{project}.json', 'r') as file:
                 data = json.load(file)
                 for project in data:      
                     project_data = [project["id"],project["title"],project["leader"]]
@@ -130,7 +143,7 @@ class User:
     def choose_leading_projects(self):
          Options = {}
          for project in self.__leading_projects:
-            with open(f'Data\\Projects_Data\\{project}.json' , 'w') as file:
+            with open(f'Data\\Projects_Data\\{project}\\{project}.json' , 'w') as file:
                 Data = json.load(file)
                 for key , value in Data:
                     Options[project : value]
@@ -140,7 +153,7 @@ class User:
     def choose_contributing_projects(self):
          Options = {}
          for project in self.__contributing_projects:
-            with open(f'Data\\Projects_Data\\{project}.json' , 'w') as file:
+            with open(f'Data\\Projects_Data\\{project}\\{project}.json' , 'w') as file:
                 Data = json.load(file)
                 for key , value in Data:
                     Options[project : value]
@@ -152,7 +165,7 @@ class User:
         #and then make a file and other stuff
         pass
     
-    def delete_project() :
+    def delete_project(self) :
         #delete project from file of projecta , leader and all the members file
         pass
 
@@ -182,3 +195,5 @@ class User:
                         return 
                     elif selected_option == "back" :
                         continue
+                    elif selected_option == "email changed":
+                        self.__update_file_attributes()

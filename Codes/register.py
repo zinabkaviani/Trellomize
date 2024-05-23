@@ -29,7 +29,7 @@ def check_existing_email(email_address):
             if os.path.exists("Data\\Accounts_Data\\users.txt"):
                 with open("Data\\Accounts_Data\\users.txt", "r") as file:
                     for line in file:
-                        _ , sorted_email_address = line.strip().split(',')
+                        user_name , sorted_email_address = line.strip().split(',')
                         if email_address == sorted_email_address:
                             return True
             return False
@@ -82,7 +82,8 @@ def register():
     data = {
         "account" :{"username":username ,"email_address":email_address ,"password":password},
         "leading_projects" : [],
-        "contributing_projects" : []
+        "contributing_projects" : [],
+        "is_active": 0
     }
     
     with open(f"Data\\Accounts_Data\\Users\\{username}.json","w" ) as file:
@@ -93,50 +94,58 @@ def register():
                      contributing_projects=[],leading_projects=[])
 
 def Log_in():
-    print("Enter username or email address(email address correct format : name@(gmail|yahoo|outlook|hotmail|live|aol.com): ")
-    name = globals.get_input_with_cancel()
-    if name == None or password ==  None :
-        return 
-    
-    print("\nEnter password: ")
-    password = globals.get_input_with_cancel()
-    if  password ==  None :
-        return 
-    user_data = None
+    while True:
+        os.system("cls")
+        print("Enter username or email address(email address correct format : name@(gmail|yahoo|outlook|hotmail|live|aol.com): ")
+        name = globals.get_input_with_cancel()
+        if name == None:
+            return 
+        
+        print("\nEnter password: ")
+        password = globals.get_input_with_cancel()
+        if password == None:
+            return 
+        user_data = None
 
-    with open("Data\\Accounts_Data\\users.txt", 'r') as file:
-        if "@" in name:
-            for line in file:
-                username , email_address = line.strip().split(',')        
-                
-                if  name == email_address:
-                    with open(f"Data\\Accounts_Data\\Users\\{username}.json", 'r') as file:
-                        user_data = globals.json.load(file)
-                                        
-                    if check_password(entered_password=password ,hashed_password= user_data["account"]["password"]):
-                        return user.User(account=user.Account(username=username , email_address = email_address,\
-                                                                password=encode_password(password)),contributing_projects=user_data["contributing_projects"],\
-                                                                leading_projects=user_data["leading_projects"])
+        with open("Data\\Accounts_Data\\users.txt", 'r') as file:
+            if "@" in name:
+                for line in file:
+                    username , email_address = line.strip().split(',')        
                     
-            error_messages =["Error" , "Email address or Password is incorrect"]
-            globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
-            
-                                        
-        else:
-            for line in file:
-                username , email_address = line.strip().split(',')        
+                    if  name == email_address:
+                        with open(f"Data\\Accounts_Data\\Users\\{username}.json", 'r') as file:
+                            user_data = globals.json.load(file)
+                                            
+                        if check_password(entered_password=password ,hashed_password= user_data["account"]["password"]):
+                            if user_data["is_active"] == 0:
+                                return user.User(account=user.Account(username=username , email_address = email_address,\
+                                                                        password=user_data["account"]["password"]),contributing_projects=user_data["contributing_projects"],\
+                                                                        leading_projects=user_data["leading_projects"])
+                            
+                error_messages =["Error" , "Email address or Password is incorrect"]
+                if user_data["is_active"] == 1:
+                    error_messages = ["Banned" , "Your account has been deactivated by the admin"]
+                globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
                 
-                if name == username:            
-                    with open(f"Data\\Accounts_Data\\Users\\{username}.json", 'r') as file:
-                        user_data = globals.json.load(file)
-                                        
-                    if check_password(entered_password=password ,hashed_password= user_data["account"]["password"]):
-                        return user.User(account=user.Account(username=username , email_address = email_address,\
-                                                            password=encode_password(password)),contributing_projects=user_data["contributing_projects"],\
-                                                            leading_projects=user_data["leading_projects"])
+                                            
+            else:
+                for line in file:
+                    username , email_address = line.strip().split(',')        
+                    
+                    if name == username:            
+                        with open(f"Data\\Accounts_Data\\Users\\{username}.json", 'r') as file:
+                            user_data = globals.json.load(file)
+                                            
+                        if check_password(entered_password=password ,hashed_password= user_data["account"]["password"]):
+                            if user_data["is_active"] == 0:
+                                return user.User(account=user.Account(username=username , email_address = email_address,\
+                                                                    password=user_data["account"]["password"]),contributing_projects=user_data["contributing_projects"],\
+                                                                    leading_projects=user_data["leading_projects"])
 
-            error_messages =["Error" , "Username or Password is incorrect"]
-            globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
+                error_messages =["Error" , "Username or Password is incorrect"]
+                if user_data["is_active"] == 1:
+                    error_messages = ["Banned" , "Your account has been deactivated by the admin"]
+                globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
                                 
                 
 

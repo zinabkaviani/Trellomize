@@ -24,7 +24,7 @@ def admin_exists(username):
     return username != None
 
 def save_admin_to_database(username , encoded_password):
-    with open(".\\Manager\\manager.txt" , "a") as file:
+    with open(".\\Manager\\manager.txt" , "w") as file:
         file.write(f"{username},{encoded_password}\n")
 
 def refresh_folder(folder_path):
