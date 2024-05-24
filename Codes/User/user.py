@@ -2,7 +2,7 @@ import json
 import os
 import globals
 from globals import print_message
-
+from Project_Task import project
 
 def check_existing_username(username):
     if os.path.exists("Data\\Accounts_Data\\users.txt"):
@@ -90,19 +90,20 @@ class User:
     
     def __update_file_attributes(self):
         user_data = {
-            "account": self.__account.__dict__,
+            "account": {"username": self.__account.__dict__["_Account__username"], \
+                        "email_address": self.__account.__dict__["_Account__email_address"],\
+                        "password": self.__account.__dict__["_Account__password"]},
             "leading_projects": self.__leading_projects,
             "contributing_projects": self.__contributing_projects,
-            "is_active": True
+            "is_active": 0
         }
-        with open(f"Data\\Accounts_Data\\Usera\\{self.__account.get_username()}.json" , "w") as file:
+        with open(f"Data\\Accounts_Data\\Users\\{self.__account.get_username()}.json" , "w") as file:
             json.dump(user_data , file)
     
     def display_projects(self):
         
         """opens the files of both types of projects the user has and then show the details somehow"""
         globals.print_message(message="Leading Projects",color="reset")
-        globals.getch()
         all_leading_projects_data =[]         
         for project in self.__contributing_projects:
             with open(f'Data\\Projects_Data\\{project}\\{project}.json', 'r') as file:
@@ -115,7 +116,6 @@ class User:
         
         
         globals.print_message("Contibuting Projects")
-        globals.getch() 
         all_contibuting_projects_data =[]         
         for project in self.__contributing_projects:
             with open(f'Data\\Projects_Data\\{project}\\{project}.json', 'r') as file:
@@ -125,6 +125,7 @@ class User:
                     all_contibuting_projects_data.append(project_data)
         headers=["ID","Title","Leader"]
         print(globals.create_project_table(headers=headers,data=all_contibuting_projects_data))
+        globals.getch() 
         
     
     def choose_project(self):
@@ -144,22 +145,22 @@ class User:
                 return
 
     def choose_leading_projects(self):
-         Options = {}
-         for project in self.__leading_projects:
-            with open(f'Data\\Projects_Data\\{project}\\{project}.json' , 'w') as file:
+        Options = {}
+        for project_id in self.__leading_projects:
+            with open(f'Data\\Projects_Data\\{project_id}\\{project_id}.json' , 'w') as file:
                 Data = json.load(file)
                 for key , value in Data:
-                    Options[project : value]
+                    Options[project_id : value]
         #show Options to choose to be added
-       
+        project.Project(id="id", title="man" , members=["ma" , "to"] , leader="man" , tasks=["AnIR9r"]).project_menu()
 
     def choose_contributing_projects(self):
          Options = {}
-         for project in self.__contributing_projects:
-            with open(f'Data\\Projects_Data\\{project}\\{project}.json' , 'w') as file:
+         for project_id in self.__contributing_projects:
+            with open(f'Data\\Projects_Data\\{project_id}\\{project_id}.json' , 'w') as file:
                 Data = json.load(file)
                 for key , value in Data:
-                    Options[project : value]
+                    Options[project_id : value]
         #show Options to choose to be added
         
 

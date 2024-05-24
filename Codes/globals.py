@@ -30,7 +30,7 @@ TURQUOISE = '\033[38;5;45m'
 GREEN = '\033[92m'
 RESET = '\033[0m'
 
-signed_in_username = "me"
+signed_in_username = None
 project_id = None
 task_id =None
 
@@ -245,5 +245,5 @@ def justify_input(input_string, length=10):
 
 def getch():
     """Get a single character from standard input. Does not echo to the screen."""
-    return msvcrt.getch().decode('utf-8')
+    return msvcrt.getch()
 

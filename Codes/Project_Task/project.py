@@ -65,13 +65,14 @@ class Project :
         else :
             error_messages =["Error" , "The user dose not have an account."]
             globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
+        globals.getch()
 
     def remove_members(self) :
         """leader can remove members by chosing between members list via arrow key"""
         indices_list = list(range(len(self.__members) + 1))
-        chosen_index = globals.get_arrow_key_input([*self.__members , "back"],indices_list)
+        chosen_index = globals.get_arrow_key_input([*self.__members , "back"],indices_list, display=self.dispaly_tasks())
         if chosen_index != len(self.__members):
-            certain = globals.get_arrow_key_input(["Yes" , "No"] , [0,1])
+            certain = globals.get_arrow_key_input(["Yes" , "No"] , [0,1],display=self.dispaly_tasks() + "Are you sure?")
             if certain:
                 for task_id in self.__tasks :
                     with open(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{task_id}.json" , 'r') as file :
@@ -93,16 +94,16 @@ class Project :
         for task_id in self.__tasks:
             with open(f'Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{task_id}.json', 'r') as file:
                 data = globals.json.load(file)      
-                task_data = [globals.justify_input(data["id"]), globals.justify_input(data["title"]), self.__leader,globals.justify_input(data["description"]), data["status"], \
-                                 data["priority"]]
-                all_tasks.append(task_data)
+                all_tasks.append([globals.justify_input(data["id"]), globals.justify_input(data["title"]), self.__leader,globals.justify_input(data["description"]), data["status"], \
+                                 data["priority"]])
         
-        status_tables = self.display_tables_by_status(all_tasks)
-        self.print_tables_horizontally(status_tables)
+        status_tables = self.display_tables_by_status(tasks=all_tasks)
+        return self.print_tables_horizontally(status_tables)
     
     @staticmethod
     def print_tables_horizontally(tables):
-        max_rows = max(len(table.split('\n')) for table in tables.values())
+        display = ""
+        max_rows = max(len(table) for table in tables.values())
         for i in range(max_rows):
             row_parts = []
             for table in tables.items():
@@ -147,9 +148,10 @@ class Project :
                 "description" : des,
                 "start_date" : start_time,
                 "end_date" : end_time,
+                "leader" : globals.signed_in_username,
                 "assignees" : [],
-                "priority" : task.Priority.LOW.value,
-                "status" : task.Status.BACKLOG.value,
+                "priority" : task.Priority.LOW.name,
+                "status" : task.Status.BACKLOG.name,
                 "history" : "" ,
                 "comments" : []
             }
@@ -169,10 +171,10 @@ class Project :
         available_tasks.append("Back")
         available_indices = list(range(len(available_tasks)))
         while True:
-            chosen_index = globals.get_arrow_key_input(options=available_tasks,available_indices= available_indices)
+            chosen_index = globals.get_arrow_key_input(options=available_tasks,available_indices= available_indices,display=self.dispaly_tasks())
             
             if chosen_index != len(available_tasks) - 1:
-                input = globals.get_arrow_key_input(options=["yes","no"],available_indices=[0,1],display="Are you sure about this?")
+                input = globals.get_arrow_key_input(options=["yes","no"],available_indices=[0,1],display=self.dispaly_tasks + "Are you sure about this?")
                 if input == 0 :
                     globals.os.remove(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{self.__tasks[chosen_index]}.json")
                     self.__tasks.remove(self.__tasks[chosen_index])
@@ -192,26 +194,28 @@ class Project :
                 available_tasks.append(data["title"] + 10 * ' ' + task_id + '\n'  + data["description"])
         available_tasks.append("Back")
         available_indices = list(range(len(available_tasks)))
-        chosen_index = globals.get_arrow_key_input(options=available_tasks,available_indices= available_indices)         
+        chosen_index = globals.get_arrow_key_input(options=available_tasks,available_indices= available_indices,display=self.dispaly_tasks())         
         if chosen_index != len(self.__tasks):
             choice = self.__tasks[chosen_index]
         if choice != None:
             with open(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{choice}.json" , "r") as file :
                 data= globals.json.load(file)
                 candidates_for_assignment = data["candidates_for_assignment"]
-                title = data["title"],
-                description= data["description"],
-                start_time = data["start_date"] ,
-                end_time = data["end_date"] ,
-                assigness = data["assignees"] ,
-                priority = data["priority"] , 
-                status = data["status"] ,
-                history = data["history"],
+                title = data["title"]
+                description= data["description"]
+                start_time = data["start_date"]
+                end_time = data["end_date"]
+                assigness = data["assignees"]
+                priority = data["priority"] 
+                status = data["status"]
+                history = data["history"]
                 comments = data["comments"]
-                task_comments = [task.Comment(comment["account"],comment["text"],comment["date_of_comment"]) for comment in comments]
+                leader = data["leader"]
+                task_comments = [task.Comment(comment["username"],comment["text"],comment["date_of_comment"],\
+                                              comment["time_of_comment"]) for comment in comments]
                 globals.task_id = choice
                 return task.Task(title=title,candidates_for_assignment=candidates_for_assignment,random_id = choice, description=description ,\
-                                 start_date= start_time , end_date=end_time ,assignees= assigness ,\
+                                 start_date= start_time , end_date=end_time ,leader= leader, assignees= assigness ,\
                                  priority=priority, status= status ,history= history,comments=task_comments )
 
 
@@ -253,16 +257,15 @@ class Project :
             self.__update_file_attributes()
 
     def project_menu(self) :
-        while True:
-            self.dispaly_tasks() 
+        while True: 
             options = ["Add Member" ,"Remove Member" ,"Add_Task" , "Remove Task" ,"Choose Task" ,"Leave Project" , "Exit Project"]
             indices_list = list(range(len(options)))
             choice = None
             if self.__leader == globals.signed_in_username :
-                choice = options[globals.get_arrow_key_input(options ,indices_list )]
+                choice = options[globals.get_arrow_key_input(options ,indices_list , display=self.dispaly_tasks())]
             else :
-                available_indices = [4, 5] 
-                choice = options[globals.get_arrow_key_input(options ,available_indices )]
+                available_indices = [4, 5 , 6] 
+                choice = options[globals.get_arrow_key_input(options ,available_indices, display=self.dispaly_tasks() )]
 
             match choice :
                 case "Add Member" :

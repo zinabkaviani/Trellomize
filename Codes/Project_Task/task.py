@@ -3,8 +3,8 @@ import globals
 from enum import Enum, auto
 
 class Comment:
-    def __init__(self, user_name, text, date_of_comment, time_of_comment):
-        self.__user_name = user_name
+    def __init__(self, username, text, date_of_comment, time_of_comment):
+        self.__username = username
         self.__text = text
         self.__date_of_comment = date_of_comment
         self.__time_of_comment = time_of_comment
@@ -20,11 +20,11 @@ class Comment:
         
         text_lines = globals.split_text(self.__text, box_width - 3)
         is_signed_in = False
-        if self.__user_name == globals.signed_in_username:
+        if self.__username == globals.signed_in_username:
             is_signed_in = True
         formatted_comment = ''
         formatted_comment += is_signed_in * 40 * ' ' + upper_line + '\n'
-        formatted_comment += is_signed_in * 40 * ' ' + '| {0:<47}|\n'.format(self.__user_name)
+        formatted_comment += is_signed_in * 40 * ' ' + '| {0:<47}|\n'.format(self.__username)
         formatted_comment += is_signed_in * 40 * ' ' + empty_line + '\n'
 
         for line in text_lines:
@@ -37,8 +37,8 @@ class Comment:
 
         return formatted_comment
 
-    def get_user_name(self):
-        return self.__user_name
+    def get_username(self):
+        return self.__username
 
     def get_text(self):
         return self.__text
@@ -96,42 +96,62 @@ class Task:
         self.__history = history
         self.__comments = comments
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Shows the task details in a nice format"""
         box_width = 50
         upper_line = '╭' + '-' * (box_width - 2) + '╮'
         lower_line = '╰' + '-' * (box_width - 2) + '╯'
-
+        title_lines = globals.split_text("Task: " + self.__title , 47)
+        des_lines = globals.split_text("Description: " + self.__description , 47)
+        assignees_lines = globals.split_text("Assignees: " + ', '.join(self.__assignees) , 47)
+        empty_line = '| {0:<47}|\n'.format("")
         formatted_task = ''
         formatted_task += upper_line + '\n'
-        formatted_task += '| {0:<47}|\n'.format("Task: " + self.__title)
+        for line in title_lines:
+            formatted_task += '| {0:<47}|\n'.format(line)
+        formatted_task += empty_line
         formatted_task += '| {0:<47}|\n'.format("ID: " + self.__random_id)
-        formatted_task += '| {0:<47}|\n'.format("Description: " + self.__description)
+        formatted_task += empty_line
+        for line in des_lines:
+            formatted_task += '| {0:<47}|\n'.format(line)
+        formatted_task += empty_line
         formatted_task += '| {0:<47}|\n'.format("Start Date: " + self.__start_date)
+        formatted_task += empty_line
         formatted_task += '| {0:<47}|\n'.format("End Date: " + (self.__end_date if self.__end_date else "Not set"))
+        formatted_task += empty_line
         formatted_task += '| {0:<47}|\n'.format("Leader: " + self.__leader)
-        formatted_task += '| {0:<47}|\n'.format("Assignees: " + ', '.join(self.__assignees))
+        formatted_task += empty_line
+        for line in assignees_lines:
+            formatted_task += '| {0:<47}|\n'.format(line)
+        formatted_task += empty_line
         formatted_task += '| {0:<47}|\n'.format("Priority: " + str(self.__priority))
+        formatted_task += empty_line
         formatted_task += '| {0:<47}|\n'.format("Status: " + str(self.__status))
 
         formatted_task += lower_line + '\n'
 
         return formatted_task
+    
     def __update_file_attributes(self):
         """Updates the Task file with Task attributes"""
         task_data = {
+            "id": self.__random_id,
             "candidates_for_assignment": self.__candidates_for_assignment,
             "title": self.__title,
             "description": self.__description,
             "start_date": self.__start_date,
             "end_date": self.__end_date,
+            "leader": self.__leader,
             "assignees": self.__assignees,
             "priority": self.__priority,
             "status": self.__status,
             "history": self.__history,
-            "comments": [comment.__dict__ for comment in self.__comments]
+            "comments": [{"username": comment.get_username(),
+                          "text": comment.get_text(),
+                          "date_of_comment": comment.get_date_of_comment(),
+                          "time_of_comment": comment.get_time_of_comment()} for comment in self.__comments]
         }
-        with open(f"Data\\Projects_Data\\{globals.project_id}\\{self.__random_id}.json" , 'w') as file:
+        with open(f"Data\\Projects_Data\\{globals.project_id}\\Project_Tasks\\{self.__random_id}.json" , 'w') as file:
             globals.json.dump(task_data , file)
 
     def edit_title(self):
@@ -163,7 +183,7 @@ class Task:
                 indices_list.append(assignee_index)
         indices_list.append(len(options) - 1)
 
-        choice = options[globals.get_arrow_key_input(options=options, available_indices= indices_list)]
+        choice = options[globals.get_arrow_key_input(options=options, available_indices= indices_list,display=self)]
         if choice != "Back":
             self.__assignees.append(choice)
             self.__update_file_attributes()
@@ -172,7 +192,7 @@ class Task:
         """remove an assignee from the task"""
         options = [*self.__assignees , "Back"]
         indices_list = list(range(len(options)))
-        choice = options[globals.get_arrow_key_input(options=options, available_indices=indices_list)]
+        choice = options[globals.get_arrow_key_input(options=options, available_indices=indices_list,display=self)]
         #Check if the leader is sure about removing the assignee
         if choice != "Back":
             self.__assignees.remove(choice)
@@ -182,41 +202,43 @@ class Task:
         """changes the urgency of the Task"""
         options = ["LOW" , "MEDIUM" , "HIGH" , "CRITICAL" , "BACK"]
         available_indices = list(range(len(options)))
+        available_indices.remove(options.index(self.__priority))
         choice = options[globals.get_arrow_key_input(options=options,available_indices=available_indices,display=self)]
         match choice:
             case "LOW":
-                self.__priority = Priority.LOW
+                self.__priority = Priority.LOW.name
                 self.__update_file_attributes()
             case "MEDIUM":
-                self.__priority = Priority.MEDIUM
+                self.__priority = Priority.MEDIUM.name
                 self.__update_file_attributes()
             case "HIGH":
-                self.__priority = Priority.HIGH
+                self.__priority = Priority.HIGH.name
                 self.__update_file_attributes()
             case "CRITICAL":
-                self.__priority = Priority.CRITICAL
+                self.__priority = Priority.CRITICAL.name
                 self.__update_file_attributes()
     
     def change_status(self):
         """changes the status of the Task"""
         options = ["BACKLOG" , "TODO" , "DOING" , "DONE" , "ARCHIVED" , "BACK"]
         available_indices = [0 , 1 , 2 , 3 , 4 , 5]
+        available_indices.remove(options.index(self.__status))
         choice = options[globals.get_arrow_key_input(options=options, available_indices=available_indices, display=self)]
         match choice:
             case "BACKLOG":
-                self.__status =Status.BACKLOG
+                self.__status =Status.BACKLOG.name
                 self.__update_file_attributes()
             case "TODO":
-                self.__status = Status.TODO
+                self.__status = Status.TODO.name
                 self.__update_file_attributes()
             case "DOING":
-                self.__status = Status.DOING
+                self.__status = Status.DOING.name
                 self.__update_file_attributes()
             case "DONE":
-                self.__status = Status.DONE
+                self.__status = Status.DONE.name
                 self.__update_file_attributes()
             case "ARCHIVED":
-                self.__status = Status.ARCHIVED
+                self.__status = Status.ARCHIVED.name
                 self.__update_file_attributes()
 
     def display_history(self):
@@ -243,7 +265,7 @@ class Task:
         if comment == None:
             return
         else:
-            comment_obj = Comment(text=comment, user_name=globals.signed_in_username,\
+            comment_obj = Comment(text=comment, username=globals.signed_in_username,\
                             date_of_comment=str(globals.datetime.datetime.now().date()),\
                             time_of_comment=globals.datetime.datetime.now().time().strftime("%H:%M:%S"))
             self.__comments.append(comment_obj)
@@ -255,7 +277,7 @@ class Task:
         """the signed in user can delete a comment of their own in the task"""
         available_indices = []
         for i in range(len(self.__comments)):
-            if self.__comments[i].get_user_name() == globals.signed_in_username:
+            if self.__comments[i].get_username() == globals.signed_in_username:
                 available_indices.append(i)
         if self.__leader == globals.signed_in_username:
             available_indices = list(range(len(self.__comments)))
@@ -274,7 +296,7 @@ class Task:
         """user can edit the comments they have added"""
         available_indices = []
         for i in range(len(self.__comments)):
-            if self.__comments[i].get_user_name() == globals.signed_in_username:
+            if self.__comments[i].get_username() == globals.signed_in_username:
                 available_indices.append(i)
         available_indices.append(len(self.__comments))
         options = ["\n" + str(comment) for comment in self.__comments]
@@ -326,7 +348,7 @@ class Task:
             available_indices = [6 , 8 , 9]
             
         while True:
-            choice = options[globals.get_arrow_key_input(options=options, available_indices=available_indices)]
+            choice = options[globals.get_arrow_key_input(options=options, available_indices=available_indices,display=self)]
             match choice:
                 case "Edit Title":
                     self.edit_title()
