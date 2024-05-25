@@ -31,10 +31,10 @@ def check_existing_username(username):
     if os.path.exists("Data\\Accounts_Data\\users.txt"):
         with open("Data\\Accounts_Data\\users.txt", "r") as file:
             for line in file:
-                stored_username, _ = line.strip().split(',')
+                stored_username, email = line.strip().split(',')
                 if username == stored_username:
                     return True
-        return False
+    return False
 
 
 def check_existing_email(email_address):
@@ -44,47 +44,48 @@ def check_existing_email(email_address):
                 user_name , sorted_email_address = line.strip().split(',')
                 if email_address == sorted_email_address:
                     return True
-        return False
+    return False
+    
 def admin_username_check(user_username):
 
     if os.path.exists("Manager\\manager.txt"):
         with open("Manager\\manager.txt","r")as file:
             for line in file:
-                admin_username , _ = line.strip().split(",")
+                admin_username , email = line.strip().split(",")
                 if user_username == admin_username:
                     return True
-            return False
+    return False
 
 def admin_email_check(user_email_address):
 
     if os.path.exists("Manager\\manager.txt"):
         with open("Manager\\manager.txt","r")as file:
             for line in file:
-                _ , admin_email_address = line.strip().split(",")
+                username , admin_email_address = line.strip().split(",")
                 if user_email_address == admin_email_address:
                     return True
-            return False  
+    return False  
         
 def register():
 
-    os.system("cls")
     username =None
     email_address = None
     password = None
     while True:
+        os.system("cls")
         print("pree Esc to exit")
-        print("\nEnter username: ")
+        print("\nEnter username:(correct format : less than 15 character & without special characters(@,#,$...) )")
         username = globals.get_input_with_cancel()
         if username == None:
             return
-        if is_username_length_valid(username=username):
-            error_messages =["Error" , "Username should be les sthan 15 character."]
+        if not is_username_length_valid(username=username):
+            error_messages =["Error" , "Username should be less than 15 character."]
             globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
-            return
-        if is_valid_username(username=username):
-            error_messages =["Error" , "Username cant have special character."]
+            continue
+        if not is_valid_username(username=username):
+            error_messages =["Error" , "Username can't have special character."]
             globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
-            return
+            continue
 
         print("\nEnter email address(correct format : name@(gmail|yahoo|outlook|hotmail|live|aol/.com): ")
         email_address = globals.get_input_with_cancel()

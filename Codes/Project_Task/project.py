@@ -4,13 +4,13 @@ import os
 
 
 def check_existing_username(username):
-            if os.path.exists("Data\\Accounts_Data\\users.txt"):
-                with open("Data\\Accounts_Data\\users.txt", "r") as file:
-                    for line in file:
-                        stored_username, _ = line.strip().split(',')
-                        if username == stored_username:
-                            return True
-            return False
+    if os.path.exists("Data\\Accounts_Data\\users.txt"):
+        with open("Data\\Accounts_Data\\users.txt", "r") as file:
+            for line in file:
+                stored_username, email = line.strip().split(',')
+                if username == stored_username:
+                    return True
+    return False
 
 
 class Project :
@@ -91,10 +91,13 @@ class Project :
     def display_task_menu(self):
         """a menu for the user to choose what status should be displayed"""
         status_table = self.display_tasks()
-        options = ["Back log" , "To do" ,"Doing" ,"Done" ,"Archived","Baclk"]
+        options = ["BACKLOG" , "TODO" ,"DOING" ,"DONE" ,"ARCHIVED","Back"]
         available_indices =[0 ,1 ,2 ,3 ,4 ,5]
         while True:
-            choice = options[globals.get_arrow_key_input(options=options , available_indices=available_indices)]
+            choice = options[globals.get_arrow_key_input(options=options , available_indices=available_indices,\
+                                                        display= self+"Please choose the status you want to see its tasks")]
+            os.system("cls")
+
             match choice :
                 case "Back log":
                     print(status_table["BACKLOG"])
@@ -238,13 +241,13 @@ class Project :
 
     def leave_project(self) :
         """users and leader can leave project"""
-        print("Are you sure about this?(enter yes if you are and anything else if not)")
-        print("you can also press Esc to return: ")
-        answer = globals.get_input_with_cancel()
+        options =["Yes" ,"No"]
+        available_indices = [0 ,1]
+        answer = options[ globals.get_arrow_key_input(options=options ,available_indices=available_indices,display="Are you sure about this?")]
         if answer == "yes":
-            self.leaving_projects()    
-        else:
-            return
+            self.leaving_projects()  
+            return "leave"   
+         
         
     def leaving_projects(self):
         """helping function for leaving the project"""
@@ -281,7 +284,7 @@ class Project :
             if self.__leader == globals.signed_in_username :
                 choice = options[globals.get_arrow_key_input(options ,indices_list , display=self.__str__())]
             else :
-                available_indices = [2 ,4 ,5 ,6] 
+                available_indices = [2 ,5 ,6 ,7] 
                 choice = options[globals.get_arrow_key_input(options ,available_indices, display=self.__str__ )]
 
             match choice :
@@ -300,6 +303,7 @@ class Project :
                     if chosen_task != None:
                         chosen_task.task_menu()
                 case "Leave Project":
-                    self.leave_project()
+                    if self.leave_project() == "leave":
+                        return
                 case "Exit Project":
                     return

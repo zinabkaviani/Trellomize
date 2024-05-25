@@ -23,7 +23,7 @@ def check_existing_username(username):
     if os.path.exists("Data\\Accounts_Data\\users.txt"):
         with open("Data\\Accounts_Data\\users.txt", "r") as file:
             for line in file:
-                stored_username, _ = line.strip().split(',')
+                stored_username, email = line.strip().split(',')
                 if username == stored_username:
                     return True
     return False
@@ -32,13 +32,11 @@ def check_existing_email(email_address):
     if os.path.exists("Data\\Accounts_Data\\users.txt"):
         with open("Data\\Accounts_Data\\users.txt", "r") as file:
             for line in file:
-                user_name , sorted_email_address = line.strip().split(',')
+                username , sorted_email_address = line.strip().split(',')
                 if email_address == sorted_email_address:
                     return True
     return False
 
-from Project_Task import project
-from register import check_existing_email ,check_email_format
 
 class Account:
     
@@ -106,13 +104,13 @@ class Account:
                     return "back"
                 
     def __update_file_attributes(self):
-        user_data = {
-            "account": {
+        with open(f"Data\\Accounts_Data\\Users\\{self.__username}.json", "r") as file:
+            user_data = json.load(file)
+            user_data["account"] = {
                 "username": self.__username,
                 "email_address": self.__email_address,
                 "password": self.__password
             }
-        }
         with open(f"Data\\Accounts_Data\\Users\\{self.__username}.json", "w") as file:
             json.dump(user_data, file)
 
@@ -137,7 +135,7 @@ class Account:
                             file.write(f"{self.__username},{new_email}\n")
                         else:
                            file.write(line)
-                
+                self.__update_file_attributes()
                 globals.print_message("Email address updated successfully.", color="green")
 
             else:
