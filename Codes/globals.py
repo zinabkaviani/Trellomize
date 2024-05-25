@@ -30,6 +30,7 @@ TURQUOISE = '\033[38;5;45m'
 GREEN = '\033[92m'
 RESET = '\033[0m'
 
+user_is_admin = False
 signed_in_username = None
 project_id = None
 task_id =None
@@ -187,10 +188,10 @@ def create_status_table(status, tasks):
  
     # Color mapping based on priority
     priority_color_map = {
-        "Low": TURQUOISE,
-        "Medium": GREEN,
-        "High": YELLOW,
-        "Critical": RED,
+        "LOW": TURQUOISE,
+        "MEDIUM": GREEN,
+        "HIGH": YELLOW,
+        "CRITICAL": RED,
     }
 
     headers = ["ID","Title", "Priority", "Leader", "Description"]
@@ -206,7 +207,7 @@ def create_status_table(status, tasks):
         separator = color + left + mid.join(hline * (w + 2) for w in col_widths) + right + RESET
         return separator
 
-    status_label = f" Status: {status.value} "
+    status_label = f" Status: {status.name} "
     status_border = tl + status_label + hline * (sum(col_widths) + 3 * len(col_widths) - len(status_label) - 1) + tr
     header_top_border = create_separator(tl, tj, tr)
     header_row = create_row(headers, RESET)
@@ -214,7 +215,7 @@ def create_status_table(status, tasks):
 
     data_rows = []
     for row in data:
-        color = priority_color_map.get(row[1], RESET)
+        color = priority_color_map.get(row[2], RESET)
         data_rows.append(create_row(row, color))
         data_rows.append(create_separator(lj, mj, rj, color))
     if data_rows:
