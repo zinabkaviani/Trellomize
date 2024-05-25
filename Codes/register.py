@@ -159,7 +159,7 @@ def Log_in():
                                                 
                             if check_password(entered_password=password ,hashed_password= user_data["account"]["password"]):
                                 if admin_email_check(name):
-                                        globals.user_is_admin = True
+                                    globals.user_is_admin = True
                                 if user_data["is_active"] == 0:
                                     globals.signed_in_username = username
                                     return user.User(account=user.Account(username=username , email_address = email_address,\
