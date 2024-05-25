@@ -37,6 +37,8 @@ def check_existing_email(email_address):
                     return True
     return False
 
+from Project_Task import project
+from register import check_existing_email ,check_email_format
 
 class Account:
     
@@ -96,15 +98,35 @@ class Account:
                     self.change_email()
                 case "Delete Account" :
                     return self.delete_Account_part()
+                case "Delete User" :
+                    return self.delete_user()
                 case "Sign Out" :
                     return "sign out"
                 case "Back" :
                     return "back"
+                
+    def __update_file_attributes(self):
+        user_data = {
+            "account": {
+                "username": self.__username,
+                "email_address": self.__email_address,
+                "password": self.__password
+            }
+        }
+        with open(f"Data\\Accounts_Data\\Users\\{self.__username}.json", "w") as file:
+            json.dump(user_data, file)
 
     def change_email(self):
             print("Enter the new email address: ")
             new_email = globals.get_input_with_cancel()
             
+            if new_email == None:
+                return
+            if not check_email_format(new_email):
+                error_messages =["Error" , "Email format is incorrect."]
+                globals.print_message()
+                return
+
             if not check_existing_email(new_email):
                 with open("Data\\Accounts_Data\\users.txt", "r") as file:
                     lines = file.readlines()
@@ -117,13 +139,13 @@ class Account:
                            file.write(line)
                 
                 globals.print_message("Email address updated successfully.", color="green")
-                globals.getch()
+
             else:
                 error_messages =["Error" , "Email address already exists."]
                 if new_email == self.__email_address:
                     error_messages = ["Error" , "This already is your Email address"]
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
-                globals.getch()
+
 
 
 

@@ -15,6 +15,18 @@ def check_email_format(email):
     pattern = r'^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outlook|hotmail|live|aol)\.com$'
     return re.match(pattern, email) is not None
 
+def is_valid_username(username):
+    """username should not have special characters"""
+    if not re.match("^[A-Za-z0-9]*$", username):
+        return False
+    return True
+
+def is_username_length_valid( username):
+        """"username is at most 15 characters long"""
+        if len(username) > 15:
+            return False
+        return True
+
 def check_existing_username(username):
     if os.path.exists("Data\\Accounts_Data\\users.txt"):
         with open("Data\\Accounts_Data\\users.txt", "r") as file:
@@ -33,7 +45,26 @@ def check_existing_email(email_address):
                 if email_address == sorted_email_address:
                     return True
         return False
+def admin_username_check(user_username):
 
+    if os.path.exists("Manager\\manager.txt"):
+        with open("Manager\\manager.txt","r")as file:
+            for line in file:
+                admin_username , _ = line.strip().split(",")
+                if user_username == admin_username:
+                    return True
+            return False
+
+def admin_email_check(user_email_address):
+
+    if os.path.exists("Manager\\manager.txt"):
+        with open("Manager\\manager.txt","r")as file:
+            for line in file:
+                _ , admin_email_address = line.strip().split(",")
+                if user_email_address == admin_email_address:
+                    return True
+            return False  
+        
 def register():
 
     os.system("cls")
@@ -46,6 +77,15 @@ def register():
         username = globals.get_input_with_cancel()
         if username == None:
             return
+        if is_username_length_valid(username=username):
+            error_messages =["Error" , "Username should be les sthan 15 character."]
+            globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
+            return
+        if is_valid_username(username=username):
+            error_messages =["Error" , "Username cant have special character."]
+            globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
+            return
+
         print("\nEnter email address(correct format : name@(gmail|yahoo|outlook|hotmail|live|aol/.com): ")
         email_address = globals.get_input_with_cancel()
         if email_address == None :
@@ -61,24 +101,22 @@ def register():
             if check_existing_username(username):
                 error_messages = ["Error", "Username already exists."]
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
-                globals.getch()
             
             elif check_existing_email(email_address) :
                 error_messages =["Error" , "Email address already exists."]
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
-                globals.getch()
+    
             else:
                 with open("Data\\Accounts_Data\\users.txt", "a") as file:
                     file.write(f"{username},{email_address}\n")
                 globals.print_message("Account successfully created.", color="green")
-                globals.getch()
                 password = encode_password(password)
                 password = password.decode('utf8')
                 break
         else :
             error_messages =["Error" , "Email format is incorrect."]
             globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
-            globals.getch()
+          
 
     
     data = {
@@ -102,12 +140,12 @@ def Log_in():
         name = globals.get_input_with_cancel()
         if name == None:
             return 
-        
         print("\nEnter password: ")
         password = globals.get_input_with_cancel()
         if password == None:
             return 
         user_data = None
+        
         if os.path.exists("Data\\Accounts_Data\\users.txt"):
             with open("Data\\Accounts_Data\\users.txt", 'r') as file:
                 if "@" in name:
@@ -119,8 +157,10 @@ def Log_in():
                                 user_data = globals.json.load(file)
                                                 
                             if check_password(entered_password=password ,hashed_password= user_data["account"]["password"]):
+                                if admin_email_check(name):
+                                        globals.user_is_admin = True
                                 if user_data["is_active"] == 0:
-                                    
+                                    globals.signed_in_username = username
                                     return user.User(account=user.Account(username=username , email_address = email_address,\
                                                                             password=user_data["account"]["password"]),contributing_projects=user_data["contributing_projects"],\
                                                                             leading_projects=user_data["leading_projects"])
@@ -130,7 +170,7 @@ def Log_in():
                         if user_data["is_active"] == 1:
                             error_messages = ["Banned" , "Your account has been deactivated by the admin"]
                     globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
-                    globals.getch()
+                    
                     
                                             
                 else:
@@ -142,6 +182,8 @@ def Log_in():
                                 user_data = globals.json.load(file)
                                                 
                             if check_password(entered_password=password ,hashed_password= user_data["account"]["password"]):
+                                if admin_username_check(name):
+                                    globals.user_is_admin = True
                                 if user_data["is_active"] == 0:
                                     globals.signed_in_username = username
                                     return user.User(account=user.Account(username=username , email_address = email_address,\
@@ -153,7 +195,7 @@ def Log_in():
                         if user_data["is_active"] == 1:
                             error_messages = ["Banned" , "Your account has been deactivated by the admin"]
                     globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
-                    globals.getch()
+                    
                                 
                 
 

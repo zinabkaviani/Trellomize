@@ -5,6 +5,7 @@ from colored import fg, attr
 import json
 import string
 import random
+import time
 import datetime
 import keyboard
 
@@ -24,6 +25,7 @@ rj = '┤' # right join
     # ANSI escape codes for colors
 RED = '\033[91m'
 YELLOW = '\033[93m' 
+MAGENTA = '\033[95m'
 CYAN = '\033[96m'
 GRAY = '\033[90m'
 TURQUOISE = '\033[38;5;45m'
@@ -68,7 +70,7 @@ def get_arrow_key_input(options, available_indices, display=""):
                 else:
                     error_message =["Error","No available options to select."]
                     print_message(f"{error_message[0]}: {error_message[1]}",color="red")
-                    getch()
+                    
 
 def print_message(message, color= "reset"):
     max_length = len(max(message.split('\n'), key=len))
@@ -85,6 +87,7 @@ def print_message(message, color= "reset"):
     print(border)
     print(f'│ {colored_message:<{max_length}}       │')  # Removed color from the border
     print('╰' + '─' * (max_length + 8) + '╯')
+    getch()
 
 
 def generate_random_id(existing_ids, length= 6):
@@ -161,7 +164,7 @@ def create_project_table(headers,data):
 
     header_top_border = GREEN + tl + tj.join(hline * (w + 2) for w in col_widths) + tr + RESET
     header_row = GREEN + create_row(headers) + RESET
-    header_middle_separator = GREEN + bl + bj.join(hline * (w + 2) for w in col_widths) + br + RESET
+    header_middle_separator = GREEN + lj + bj.join(hline * (w + 2) for w in col_widths) + rj + RESET
 
     data_top_border = create_separator(tl, tj, tr)
     bottom_border = create_separator(bl, bj, br)
@@ -247,4 +250,32 @@ def justify_input(input_string, length=10):
 def getch():
     """Get a single character from standard input. Does not echo to the screen."""
     return msvcrt.getch()
+
+def print_ascii_art_with_color_cycle():
+    ascii_art = r'''
+ _______  _____    ______   _        _        ____
+|_   ___||  __ \  |  ____| | |      | |      / __ \ 
+  | |    | |__) | | |__    | |      | |     | |  | | 
+  | |    |  _  /  |  __|   | |      | |     | |  | | 
+  | |    | | \ \  | |____  | |____  | |____ | |__| | 
+  |_|    |_|  \_\ |______| |______| |______| \____/ 
+        __   __   _____   ______   ______  
+        |  \/  | |_   _| |___  /  |  ____| 
+        | \  / |   | |      / /   | |__    
+        | |\/| |   | |     / /    |  __|   
+        | |  | |  _| |_   / /__   | |____  
+        |_|  |_| |_____| /_____|  |______|
+'''
+
+    colors = [RED, GREEN, YELLOW, TURQUOISE, MAGENTA] 
+    color_index = 0
+    while True:
+       
+        print("\033[H", end="")
+        os.system("cls" if os.name == "nt" else "clear")
+        for line in ascii_art.split("\n"):
+            print(colors[color_index] + line)
+        color_index = (color_index + 1) % len(colors)
+        
+        time.sleep(1)
 

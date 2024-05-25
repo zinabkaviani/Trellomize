@@ -65,14 +65,14 @@ class Project :
         else :
             error_messages =["Error" , "The user dose not have an account."]
             globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
-        globals.getch()
+        
 
     def remove_members(self) :
         """leader can remove members by chosing between members list via arrow key"""
         indices_list = list(range(len(self.__members) + 1))
-        chosen_index = globals.get_arrow_key_input([*self.__members , "back"],indices_list, display=self.dispaly_tasks())
+        chosen_index = globals.get_arrow_key_input([*self.__members , "back"],indices_list, display=self.__str__)
         if chosen_index != len(self.__members):
-            certain = globals.get_arrow_key_input(["Yes" , "No"] , [0,1],display=self.dispaly_tasks() + "Are you sure?")
+            certain = globals.get_arrow_key_input(["Yes" , "No"] , [0,1],display=self.__str__ + "Are you sure?")
             if certain:
                 for task_id in self.__tasks :
                     with open(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{task_id}.json" , 'r') as file :
@@ -87,8 +87,41 @@ class Project :
                 self.__members.remove(self.__members[chosen_index])
                 self.__update_file_attributes()
                 globals.print_message("Member successfully removed from project members",color="green")
+    
+    def display_task_menu(self):
+        """a menu for the user to choose what status should be displayed"""
+        status_table = self.display_tasks()
+        options = ["Back log" , "To do" ,"Doing" ,"Done" ,"Archived","Baclk"]
+        available_indices =[0 ,1 ,2 ,3 ,4 ,5]
+        while True:
+            choice = options[globals.get_arrow_key_input(options=options , available_indices=available_indices)]
+            match choice :
+                case "Back log":
+                    print(status_table["BACKLOG"])
+                    print("press any key to return")
+                    globals.getch()
+                
+                case "To do":
+                    print(status_table["TODO"])
+                    print("press any key to return")
+                    globals.getch()
+                case "Doing":
+                    print(status_table["DOING"])
+                    print("press any key to return")
+                    globals.getch()
+                case "Done":
+                    print(status_table["DONE"])
+                    print("press any key to return")
+                    globals.getch()
+                case "Archived":
+                    print(status_table["ARCHIVED"])
+                    print("press any key to return")
+                    globals.getch()
 
-    def dispaly_tasks(self) :
+                case "Back":
+                    return
+
+    def display_tasks(self) :
         """display tasks of the project"""
         all_tasks =[]
         for task_id in self.__tasks:
@@ -97,33 +130,17 @@ class Project :
                 all_tasks.append([globals.justify_input(data["id"]), globals.justify_input(data["title"]), self.__leader,globals.justify_input(data["description"]), data["status"], \
                                  data["priority"]])
         
-        status_tables = self.display_tables_by_status(tasks=all_tasks)
-        return self.print_tables_horizontally(status_tables)
+        return  self.display_tables_by_status(tasks=all_tasks)
     
-    @staticmethod
-    def print_tables_horizontally(tables):
-        display = ""
-        max_rows = max(len(table) for table in tables.values())
-        for i in range(max_rows):
-            row_parts = []
-            for table in tables.items():
-                rows = table.split('\n')
-                if i < len(rows):
-                    row_parts.append(rows[i])
-                else:
-                    row_parts.append(' ' * len(rows[0])) 
-            print('   '.join(row_parts))
-
     @staticmethod
     def display_tables_by_status(tasks = []):
         status_tables = {}
-        max_table_width = 0
         for status in task.Status:
             tasks_by_status = [task for task in tasks if task[4] == status]
             if tasks_by_status:
                 table = globals.create_status_table(status,tasks_by_status)
                 status_tables[status] = table
-                max_table_width = max(max_table_width, len(table.split('\n')[2]))
+                
         return status_tables
     
     def add_tasks(self) :
@@ -171,10 +188,10 @@ class Project :
         available_tasks.append("Back")
         available_indices = list(range(len(available_tasks)))
         while True:
-            chosen_index = globals.get_arrow_key_input(options=available_tasks,available_indices= available_indices,display=self.dispaly_tasks())
+            chosen_index = globals.get_arrow_key_input(options=available_tasks,available_indices= available_indices,display=self.__str__)
             
             if chosen_index != len(available_tasks) - 1:
-                input = globals.get_arrow_key_input(options=["yes","no"],available_indices=[0,1],display=self.dispaly_tasks + "Are you sure about this?")
+                input = globals.get_arrow_key_input(options=["yes","no"],available_indices=[0,1],display=self.__str__ + "Are you sure about this?")
                 if input == 0 :
                     globals.os.remove(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{self.__tasks[chosen_index]}.json")
                     self.__tasks.remove(self.__tasks[chosen_index])
@@ -194,7 +211,7 @@ class Project :
                 available_tasks.append(data["title"] + 10 * ' ' + task_id + '\n'  + data["description"])
         available_tasks.append("Back")
         available_indices = list(range(len(available_tasks)))
-        chosen_index = globals.get_arrow_key_input(options=available_tasks,available_indices= available_indices,display=self.dispaly_tasks())         
+        chosen_index = globals.get_arrow_key_input(options=available_tasks,available_indices= available_indices,display=self.__str__)         
         if chosen_index != len(self.__tasks):
             choice = self.__tasks[chosen_index]
         if choice != None:
@@ -258,29 +275,31 @@ class Project :
 
     def project_menu(self) :
         while True: 
-            options = ["Add Member" ,"Remove Member" ,"Add_Task" , "Remove Task" ,"Choose Task" ,"Leave Project" , "Exit Project"]
+            options = ["Add Member" ,"Remove Member" ,"Display Tasks","Add_Task" , "Remove Task" ,"Choose Task" ,"Leave Project" , "Exit Project"]
             indices_list = list(range(len(options)))
             choice = None
             if self.__leader == globals.signed_in_username :
-                choice = options[globals.get_arrow_key_input(options ,indices_list , display=self.dispaly_tasks())]
+                choice = options[globals.get_arrow_key_input(options ,indices_list , display=self.__str__())]
             else :
-                available_indices = [4, 5 , 6] 
-                choice = options[globals.get_arrow_key_input(options ,available_indices, display=self.dispaly_tasks() )]
+                available_indices = [2 ,4 ,5 ,6] 
+                choice = options[globals.get_arrow_key_input(options ,available_indices, display=self.__str__ )]
 
             match choice :
-                case "Add Member" :
+                case "Add Member":
                     self.add_member() 
-                case "Remove Member" :
+                case "Remove Member":
                     self.remove_members()
-                case "Add_Task" :
+                case "Display Tasks":
+                    self.display_task_menu()
+                case "Add_Task":
                     self.add_tasks()
-                case "Remove Task" :
+                case "Remove Task":
                     self.remove_tasks()
-                case "Choose Task" :
+                case "Choose Task":
                     chosen_task = self.choose_task()
                     if chosen_task != None:
                         chosen_task.task_menu()
-                case "Leave Project" :
+                case "Leave Project":
                     self.leave_project()
-                case "Exit Project" :
+                case "Exit Project":
                     return
