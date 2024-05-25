@@ -114,19 +114,21 @@ def Log_in():
                     for line in file:
                         username , email_address = line.strip().split(',')        
                         
-                        if  name == email_address:
+                        if name == email_address:
                             with open(f"Data\\Accounts_Data\\Users\\{username}.json", 'r') as file:
                                 user_data = globals.json.load(file)
                                                 
                             if check_password(entered_password=password ,hashed_password= user_data["account"]["password"]):
                                 if user_data["is_active"] == 0:
+                                    
                                     return user.User(account=user.Account(username=username , email_address = email_address,\
                                                                             password=user_data["account"]["password"]),contributing_projects=user_data["contributing_projects"],\
                                                                             leading_projects=user_data["leading_projects"])
                                 
                     error_messages =["Error" , "Email address or Password is incorrect"]
-                    if user_data["is_active"] == 1:
-                        error_messages = ["Banned" , "Your account has been deactivated by the admin"]
+                    if user_data != None:
+                        if user_data["is_active"] == 1:
+                            error_messages = ["Banned" , "Your account has been deactivated by the admin"]
                     globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
                     globals.getch()
                     
@@ -147,8 +149,9 @@ def Log_in():
                                                                         leading_projects=user_data["leading_projects"])
 
                     error_messages =["Error" , "Username or Password is incorrect"]
-                    if user_data["is_active"] == 1:
-                        error_messages = ["Banned" , "Your account has been deactivated by the admin"]
+                    if user_data != None:
+                        if user_data["is_active"] == 1:
+                            error_messages = ["Banned" , "Your account has been deactivated by the admin"]
                     globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
                     globals.getch()
                                 
