@@ -1,9 +1,24 @@
 import json
 import os
 import globals
-from globals import print_message
+import re
 from Project_Task import project
 
+def check_email_format(email):
+    pattern = r'^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outlook|hotmail|live|aol)\.com$'
+    return re.match(pattern, email) is not None
+
+def delete_project_from_data(project_id):
+    with open(f"Data\\Accounts_Data\\{project_id}\\{project_id}.json" , "r") as project_file:
+        project_data= json.load(project_file)
+        for member in project_data["members"]:
+            with open(f"Data\\Accounts_Data\\Users\\{member}.json" , "r") as file :
+                task_data = globals.json.load(file)
+                task_data["contributing_projects"].remove(project_id)
+                with open(f"Data\\Accounts_Data\\Users\\{member}.json" , "w") as updated_file :
+                    globals.json.dump(task_data,updated_file)
+    globals.shutil.rmtree(f"Data\\Projects_Data\\{project_id}")
+    
 def check_existing_username(username):
     if os.path.exists("Data\\Accounts_Data\\users.txt"):
         with open("Data\\Accounts_Data\\users.txt", "r") as file:
@@ -14,13 +29,13 @@ def check_existing_username(username):
     return False
 
 def check_existing_email(email_address):
-            if os.path.exists("Data\\Accounts_Data\\users.txt"):
-                with open("Data\\Accounts_Data\\users.txt", "r") as file:
-                    for line in file:
-                        user_name , sorted_email_address = line.strip().split(',')
-                        if email_address == sorted_email_address:
-                            return True
-            return False
+    if os.path.exists("Data\\Accounts_Data\\users.txt"):
+        with open("Data\\Accounts_Data\\users.txt", "r") as file:
+            for line in file:
+                user_name , sorted_email_address = line.strip().split(',')
+                if email_address == sorted_email_address:
+                    return True
+    return False
 
 
 class Account:
@@ -36,17 +51,51 @@ class Account:
     def get_email_address(self):
         return self.__email_address
 
+    def delete_Account_part(self):
+        print("Are you sure about this?")
+        choice = globals.get_arrow_key_input(options=["Yes" , "No"],available_indices=[0 , 1])
+        if choice == 0:
+            self.delete_user()
+            return "Account deleted"
+        
+    def delete_user(self):
+        if globals.is_admin:
+            os.remove("Manager\\managr.txt")
+        with open("Data\\Accounts_Data\\users.txt", "r") as file:
+            lines = file.readlines()
+            with open("Data\\Accounts_Data\\users.txt", "w") as new_file:
+                for line in lines:
+                    username , _ = line.strip().split(',')
+                    if username != self.__username:
+                        new_file.write(line)
+        with open(f"Data\\Accounts_Data\\{self.__username}.json", "r") as file:
+            data = json.load(file)
+            for project_id in data["contributing_projects"]:
+                with open(f"Data\\Accounts_Data\\{project_id}\\{project_id}.json" , 'r') as project_file:
+                    project_data = json.load(project_file)
+                    project_data["members"].remove(self.__username)
+                    for task_id in project_data["tasks"]:
+                        with open(f"Data\\Projects_Data\\{project_id}\\Project_Tasks\\{task_id}.json" , 'r') as file :
+                            task_data = globals.json.load(file)
+                            task_data["assignees"].remove(self.__username)
+                            task_data["candidates_for_assignment"].remove(self.__username)
+                            with open(f"Data\\Projects_Data\\{project_id}\\Project_Tasks\\{task_id}.json" , 'w') as updated_file :
+                                globals.json.dump(task_data,updated_file)
+            for project_id in data["leading_project"]:
+                delete_project_from_data(project_id=project_id)
+        os.remove(f"Data\\Accounts_Data\\{self.__username}.json")
+
+
     def account_setting_menu(self) :
-        option =["Change Email" , "Delete User" , "Sign Out", "Back"]
+        option =["Change Email" , "Delete Account" , "Sign Out", "Back"]
         indices_list = list(range(len(option)))
         while True :
             choice = option[globals.get_arrow_key_input(option,indices_list)]
             match choice :
                 case "Change Email" :
                     self.change_email()
-                    return "email changed"
-                case "Delete User" :
-                    pass
+                case "Delete Account" :
+                    return self.delete_Account_part()
                 case "Sign Out" :
                     return "sign out"
                 case "Back" :
@@ -55,6 +104,7 @@ class Account:
     def change_email(self):
             print("Enter the new email address: ")
             new_email = globals.get_input_with_cancel()
+            
             if not check_existing_email(new_email):
                 with open("Data\\Accounts_Data\\users.txt", "r") as file:
                     lines = file.readlines()
@@ -71,7 +121,7 @@ class Account:
             else:
                 error_messages =["Error" , "Email address already exists."]
                 if new_email == self.__email_address:
-                    error_messages = ["Error" , "This is your Email address"]
+                    error_messages = ["Error" , "This already is your Email address"]
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
                 globals.getch()
 
@@ -102,35 +152,33 @@ class User:
     
     def display_projects(self):
         
-        """opens the files of both types of projects the user has and then show the details somehow"""
+        """opens the files of both types of projects the user has and then shows the details"""
         globals.print_message(message="Leading Projects",color="reset")
-        all_leading_projects_data =[]         
-        for project in self.__contributing_projects:
-            with open(f'Data\\Projects_Data\\{project}\\{project}.json', 'r') as file:
+        all_leading_projects_data =[]
+        for project_id in self.__leading_projects:
+            with open(f'Data\\Projects_Data\\{project_id}\\{project_id}.json', 'r') as file:
                 data = json.load(file)
-                for project in data:      
-                    project_data = [project["id"],project["title"],project["leader"]]
-                    all_leading_projects_data.append(project_data)
+                project_data = [data["id"],data["title"],data["leader"]]
+                all_leading_projects_data.append(project_data)
         headers=["ID","Title","Leader"]
         print(globals.create_project_table(headers=headers,data=all_leading_projects_data))
         
         
         globals.print_message("Contibuting Projects")
-        all_contibuting_projects_data =[]         
+        all_contributing_projects_data =[]         
         for project in self.__contributing_projects:
             with open(f'Data\\Projects_Data\\{project}\\{project}.json', 'r') as file:
                 data = json.load(file)
-                for project in data:      
-                    project_data = [project["id"],project["title"],project["leader"]]
-                    all_contibuting_projects_data.append(project_data)
+                project_data = [data["id"],data["title"],data["leader"]]
+                all_contributing_projects_data.append(project_data)
         headers=["ID","Title","Leader"]
-        print(globals.create_project_table(headers=headers,data=all_contibuting_projects_data))
+        print(globals.create_project_table(headers=headers,data=all_contributing_projects_data))
         globals.getch() 
         
     
     def choose_project(self):
         while True:
-            options = ['Leading projects' , 'Contributing projects' , 'Exit']
+            options = ['Leading projects' , 'Contributing projects' , 'Back']
             available_indices = [0,1,2]
             choice = options[globals.get_arrow_key_input(options=options , available_indices = available_indices)]
             if choice == 'Leading projects':
@@ -145,24 +193,33 @@ class User:
                 return
 
     def choose_leading_projects(self):
-        Options = {}
+        options = []
         for project_id in self.__leading_projects:
-            with open(f'Data\\Projects_Data\\{project_id}\\{project_id}.json' , 'w') as file:
-                Data = json.load(file)
-                for key , value in Data:
-                    Options[project_id : value]
-        #show Options to choose to be added
-        project.Project(id="id", title="man" , members=["ma" , "to"] , leader="man" , tasks=["AnIR9r"]).project_menu()
+            with open(f'Data\\Projects_Data\\{project_id}\\{project_id}.json' , 'r') as file:
+                data = json.load(file)
+                options.append(f"{data["title"]}      {data["id"]}")
+        options.append("Back")
+        choice = globals.get_arrow_key_input(options=options, available_indices=list(range(len(options))))
+        if choice != len(options) - 1:
+            globals.project_id = self.__leading_projects[choice]
+            with open(f'Data\\Projects_Data\\{self.__leading_projects[choice]}\\{self.__leading_projects[choice]}.json' , 'r') as file:
+                data = json.load(file)
+                return project.Project(id=data["id"],title=data["title"],members=data["members"],leader=data["leader"]\
+                                       , tasks=data["tasks"])
 
     def choose_contributing_projects(self):
-         Options = {}
-         for project_id in self.__contributing_projects:
+        options = []
+        for project_id in self.__contributing_projects:
             with open(f'Data\\Projects_Data\\{project_id}\\{project_id}.json' , 'w') as file:
-                Data = json.load(file)
-                for key , value in Data:
-                    Options[project_id : value]
-        #show Options to choose to be added
-        
+                data = json.load(file)
+                options.append(f"{data["title"]}      {data["id"]}      {data["leader"]}")
+        choice = globals.get_arrow_key_input(options=options, available_indices=list(range(len(options))))    
+        if choice != len(options) - 1:
+            globals.project_id= self.__contributing_projects[choice]
+            with open(f'Data\\Projects_Data\\{self.__contributing_projects[choice]}\\{self.__contributing_projects[choice]}.json' , 'r') as file:
+                data = json.load(file)
+                return project.Project(id=data["id"],title=data["title"],members=data["members"],leader=data["leader"]\
+                                       , tasks=data["tasks"])
 
     def create_project(self):
         #needs a menu and checking if a project with the same id has been made before
@@ -170,16 +227,101 @@ class User:
         pass
     
     def delete_project(self) :
-        #delete project from file of projecta , leader and all the members file
-        pass
+        while True:
+            choice = globals.get_arrow_key_input([*self.__leading_projects , "Back"] , list(range(len(self.__leading_projects) + 1)))
+            certain = 1 - globals.get_arrow_key_input(["Yes" , "No"] , available_indices= [0 , 1])
+            if choice != len(self.__leading_projects):
+                if certain:
+                    delete_project_from_data(self.__leading_projects[choice])
+            else:
+                return
+
+    def users_management(self):
+        while True:
+            choice = globals.get_arrow_key_input(["Activating users" , "Deactivating users" , "Back"] , [0 , 1 , 2])
+            if choice == 0:
+                self.user_activation()
+            elif choice == 1:
+                self.user_deactivation()
+
+    @staticmethod
+    def user_deactivation():
+        print("Enter a username or email address to deactivate the User: (cancel with Esc):")
+        user = globals.get_input_with_cancel()
+        if user != None:
+            if check_email_format(user):
+                with open("Data\\Accounts_Data\\users.txt", "r") as file:
+                    for line in file:
+                        username , sorted_email_address = line.strip().split(',')
+                        if user == sorted_email_address:
+                            with open(f"Data\\Accounts_Data\\Users\\{username}.json" , 'r') as file:
+                                data = json.load(file)
+                                if data["is_active"] == 0:
+                                    data["is_active"] = 1
+                                else:
+                                    globals.print_message(f"User {username} has already been deactivated")
+                                with open(f"Data\\Accounts_Data\\Users\\{username}.json" , 'w') as new_file:
+                                    json.dump(data,new_file)
+                            globals.print_message(f"User {username} has been deactivated")
+                            return
+                globals.print_message(f"No User with the email address {user} Exists")
+            else:
+                if os.path.exists(f"Data\\Accounts_Data\\Users\\{user}.json"):
+                    with open(f"Data\\Accounts_Data\\Users\\{user}.json" , 'r') as file:
+                        data = json.load(file)
+                        data["is_active"] = 1
+                        with open(f"Data\\Accounts_Data\\Users\\{user}.json" , 'w') as new_file:
+                            json.dump(data,new_file)
+                    globals.print_message(f"User {user} has been deactivated")
+                    return
+                globals.print_message(f"No User with the username {user} Exists")
+
+    @staticmethod
+    def user_activation():
+        print("Enter a username or email address to deactivate the User: (cancel with Esc):")
+        user = globals.get_input_with_cancel()
+        if user != None:
+            if check_email_format(user):
+                with open("Data\\Accounts_Data\\users.txt", "r") as file:
+                    for line in file:
+                        username , sorted_email_address = line.strip().split(',')
+                        if user == sorted_email_address:
+                            with open(f"Data\\Accounts_Data\\Users\\{username}.json" , 'r') as file:
+                                data = json.load(file)
+                                if data["is_active"] == 1:
+                                    data["is_active"] = 0
+                                else:
+                                    globals.print_message(f"User {username} has not been deactivated")
+                                    return
+                                with open(f"Data\\Accounts_Data\\Users\\{username}.json" , 'w') as new_file:
+                                    json.dump(data,new_file)
+                            globals.print_message(f"User {username} has been activated")
+                            return
+                globals.print_message(f"No User with the email address {user} Exists")
+            else:
+                if os.path.exists(f"Data\\Accounts_Data\\Users\\{user}.json"):
+                    with open(f"Data\\Accounts_Data\\Users\\{user}.json" , 'r') as file:
+                        data = json.load(file)
+                        if data["is_active"] == 1:
+                            data["is_active"] = 0
+                        else:
+                            globals.print_message(f"The user with the username {user} has not been deactivated")
+                            return
+                        with open(f"Data\\Accounts_Data\\Users\\{user}.json" , 'w') as new_file:
+                            json.dump(data,new_file)
+                    globals.print_message(f"User {user} has been deactivated")
+                    return
+                globals.print_message(f"No User with the username {user} Exists")
+
 
     def user_menu(self) :
         options = ["Display Projects", "Add Project" , "Choose Project" , "Delete Project" , "Account Setting"]
+        if globals.user_is_admin:
+            options.append("Users Management")
         indices_list = list(range(len(options)))
         while True:
             choice =options[globals.get_arrow_key_input(options,indices_list)]
             match choice :
-
                 case "Display Projects" :
                     self.display_projects()
 
@@ -187,7 +329,9 @@ class User:
                     self.create_project()
                 
                 case "Choose Project" :
-                    self.choose_project()
+                    result = self.choose_project()
+                    if result != None:
+                        result.project_menu()
                 
                 case "Delete Project" :
                     self.delete_project()
@@ -201,3 +345,8 @@ class User:
                         continue
                     elif selected_option == "email changed":
                         self.__update_file_attributes()
+                    elif selected_option == "Account deleted":
+                        del self
+                        return
+                case "Users Management":
+                    self.users_management()
