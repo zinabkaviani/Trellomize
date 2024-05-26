@@ -104,8 +104,16 @@ def get_current_time() :
     formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
     return formatted_time
 
-def get_added_time(start_time , **keyword) :
-    end_time = start_time + str(datetime.timedelta(**keyword))
+def get_added_time(start_time, **keyword):
+    # #keywords can be days 
+    # seconds:
+    # microseconds: 
+    # milliseconds:
+    # minutes:
+    # hours
+    # weeks
+    delta = datetime.timedelta(**keyword)
+    end_time = start_time + delta
     return end_time
 
 def get_input_with_cancel(drafted_text = ""):

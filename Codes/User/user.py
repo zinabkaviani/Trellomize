@@ -173,7 +173,7 @@ class User:
     def display_projects(self):
         
         """opens the files of both types of projects the user has and then shows the details"""
-        globals.print_message(message="Leading Projects",color="reset")
+        print("Leading Projects")
         all_leading_projects_data =[]
         for project_id in self.__leading_projects:
             with open(f'Data\\Projects_Data\\{project_id}\\{project_id}.json', 'r') as file:
@@ -184,7 +184,7 @@ class User:
         print(globals.create_project_table(headers=headers,data=all_leading_projects_data))
         
         
-        globals.print_message("Contibuting Projects")
+        print("Contributing Projects :")
         all_contributing_projects_data =[]         
         for project in self.__contributing_projects:
             with open(f'Data\\Projects_Data\\{project}\\{project}.json', 'r') as file:
@@ -244,7 +244,30 @@ class User:
     def create_project(self):
         #needs a menu and checking if a project with the same id has been made before
         #and then make a file and other stuff
-        pass
+        print("please inter an ID:")
+        id = globals.get_input_with_cancel()
+        if id == None:
+            return
+        if not os.path.exists(f'Data\\Projects_Data\\{id}'):
+            print("Please inter a title:")
+            title = globals.get_input_with_cancel()
+            if title == None:
+                return
+            os.makedirs(f'Data\\Projects_Data\\{id}')
+            os.makedirs(f'Data\\Projects_Data\\{id}\\Project_Tasks')
+            with open(f'Data\\Projects_Data\\{id}\\{id}.json',"w") as file:
+                data ={
+                    "id": id,
+                    "title": title,
+                    "members": [],
+                    "leader": globals.signed_in_username,
+                    "tasks":[]
+                    }
+                json.dump(data,file)
+        else:
+            error_message = ["Error" ,"This id have been chosen befor"]
+            globals.print_message(f"{error_message[0]}: {error_message[1]}",color="red")
+
     
     def delete_project(self) :
         while True:

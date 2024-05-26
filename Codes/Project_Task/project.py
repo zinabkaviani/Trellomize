@@ -26,13 +26,18 @@ class Project :
         box_width = 50
         upper_line = '╭' + '-' * (box_width - 2) + '╮'
         lower_line = '╰' + '-' * (box_width - 2) + '╯'
-
+        members_lines = globals.split_text("Members: " + ', '.join(self.__members),width=47)
+        empty_line = '| {0:<47}|\n'.format()
         formatted_project = ''
         formatted_project += upper_line + '\n'
-        formatted_project += '| {0:<47}|\n'.format("Project ID: " + str(self.__id))
-        formatted_project += '| {0:<47}|\n'.format("Title: " + self.__title)
-        formatted_project += '| {0:<47}|\n'.format("Members: " + ', '.join(self.__members))
+        formatted_project += '| {0:<47}|\n'.format("Project ID: " + globals.justify_input(self.__id,15))
+        formatted_project += empty_line
+        formatted_project += '| {0:<47}|\n'.format("Title: " + globals.justify_input(self.__title,15))
+        formatted_project += empty_line
         formatted_project += '| {0:<47}|\n'.format("Leader: " + self.__leader)
+        formatted_project += empty_line
+        for line in members_lines:
+            formatted_project += '| {0:<47}|\n'.format(line)
         
         formatted_project += lower_line + '\n'
 

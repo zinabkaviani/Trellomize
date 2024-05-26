@@ -123,9 +123,9 @@ class Task:
         for line in assignees_lines:
             formatted_task += '| {0:<47}|\n'.format(line)
         formatted_task += empty_line
-        formatted_task += '| {0:<47}|\n'.format("Priority: " + str(self.__priority))
+        formatted_task += '| {0:<47}|\n'.format("Priority: " + self.__priority)
         formatted_task += empty_line
-        formatted_task += '| {0:<47}|\n'.format("Status: " + str(self.__status))
+        formatted_task += '| {0:<47}|\n'.format("Status: " + self.__status)
 
         formatted_task += lower_line + '\n'
 
@@ -311,6 +311,14 @@ class Task:
     
     def change_end_time(self):
         """the signed in user can change the end time if he/she is the leader of the main project"""
+        if globals.signed_in_username == self.__leader:
+            print("Please inter your added time:(seconds=, microseconds=,milliseconds=,minutes=,hours=,days=,weeks=")
+            input = globals.get_input_with_cancel()
+            globals.get_added_time(self.__start_date ,input)
+        else:
+            error_message=["Error" ,"only admin can change due date"]
+            globals.print_message(f"{error_message[0]}: {error_message[1]}",color="red")
+   
         
 
     def comments_menu(self):
