@@ -312,14 +312,35 @@ class Task:
     def change_end_time(self):
         """the signed in user can change the end time if he/she is the leader of the main project"""
         if globals.signed_in_username == self.__leader:
-            print("Please inter your added time:(seconds=, microseconds=,milliseconds=,minutes=,hours=,days=,weeks=")
-            input = globals.get_input_with_cancel()
-            globals.get_added_time(self.__start_date ,input)
+            print("Please inter your added time in the chosen set:")
+            options =["Minutes","Hours","Days","Weeks","Back"]
+            time_selection = options[globals.get_arrow_key_input(options=options ,available_indices=[0,1,2,3,4])]
+            match time_selection:
+                case "Minutes":
+                    input = globals.get_input_with_cancel()
+                    if input == None:
+                        return
+                    globals.get_added_time(self.__start_date ,seconds=input)
+                case "Hours":
+                    input = globals.get_input_with_cancel()
+                    if input == None:
+                        return
+                    globals.get_added_time(self.__start_date ,seconds=input)
+                case "Days":
+                    input = globals.get_input_with_cancel()
+                    if input == None:
+                        return
+                    globals.get_added_time(self.__start_date ,seconds=input)
+                case "Weeks":
+                    input = globals.get_input_with_cancel()
+                    if input == None:
+                        return
+                    globals.get_added_time(self.__start_date ,seconds=input)
+                case "Back":
+                    return
         else:
             error_message=["Error" ,"only admin can change due date"]
-            globals.print_message(f"{error_message[0]}: {error_message[1]}",color="red")
-   
-        
+            globals.print_message(f"{error_message[0]}: {error_message[1]}",color="red")    
 
     def comments_menu(self):
         """Displays the menu of the available options to do with comments"""

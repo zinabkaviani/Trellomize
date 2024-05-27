@@ -3,9 +3,9 @@ from Project_Task import task
 import os
 
 
-def check_existing_username(username):
-    if os.path.exists("Data\\Accounts_Data\\users.txt"):
-        with open("Data\\Accounts_Data\\users.txt", "r") as file:
+def check_existing_username(username,file_path="Data\\Accounts_Data\\users.txt"):
+    if os.path.exists(path=file_path):
+        with open(file_path, "r") as file:
             for line in file:
                 stored_username, email = line.strip().split(',')
                 if username == stored_username:
@@ -27,7 +27,7 @@ class Project :
         upper_line = '╭' + '-' * (box_width - 2) + '╮'
         lower_line = '╰' + '-' * (box_width - 2) + '╯'
         members_lines = globals.split_text("Members: " + ', '.join(self.__members),width=47)
-        empty_line = '| {0:<47}|\n'.format()
+        empty_line = '| {0:<47}|\n'.format(" ")
         formatted_project = ''
         formatted_project += upper_line + '\n'
         formatted_project += '| {0:<47}|\n'.format("Project ID: " + globals.justify_input(self.__id,15))
@@ -42,7 +42,7 @@ class Project :
         formatted_project += lower_line + '\n'
 
         return formatted_project
-    def __update_file_attributes(self):
+    def _update_file_attributes(self):
         data = {
             "id": self.__id,
             "title": self.__title,
@@ -100,28 +100,28 @@ class Project :
         available_indices =[0 ,1 ,2 ,3 ,4 ,5]
         while True:
             choice = options[globals.get_arrow_key_input(options=options , available_indices=available_indices,\
-                                                        display= self+"Please choose the status you want to see its tasks")]
+                                                        display= self.__str__+"Please choose the status you want to see its tasks\n")]
             os.system("cls")
 
             match choice :
-                case "Back log":
+                case "BACKLOG":
                     print(status_table["BACKLOG"])
                     print("press any key to return")
                     globals.getch()
                 
-                case "To do":
+                case "TODO":
                     print(status_table["TODO"])
                     print("press any key to return")
                     globals.getch()
-                case "Doing":
+                case "DOING":
                     print(status_table["DOING"])
                     print("press any key to return")
                     globals.getch()
-                case "Done":
+                case "DONE":
                     print(status_table["DONE"])
                     print("press any key to return")
                     globals.getch()
-                case "Archived":
+                case "ARCHIVED":
                     print(status_table["ARCHIVED"])
                     print("press any key to return")
                     globals.getch()
@@ -142,13 +142,13 @@ class Project :
     
     @staticmethod
     def display_tables_by_status(tasks = []):
+
         status_tables = {}
         for status in task.Status:
             tasks_by_status = [task for task in tasks if task[4] == status]
-            if tasks_by_status:
-                table = globals.create_status_table(status,tasks_by_status)
-                status_tables[status] = table
-                
+            table = globals.create_status_table(status,tasks_by_status)
+            status_tables[status.name] = table
+
         return status_tables
     
     def add_tasks(self) :

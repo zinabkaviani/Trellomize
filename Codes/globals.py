@@ -113,8 +113,8 @@ def get_added_time(start_time, **keyword):
     # hours
     # weeks
     delta = datetime.timedelta(**keyword)
-    end_time = start_time + delta
-    return end_time
+    end_time = datetime.strptime(start_time,"%Y-%m-%d %H:%M:%S") + delta
+    return end_time.strftime("%Y-%m-%d %H:%M:%S")
 
 def get_input_with_cancel(drafted_text = ""):
     print(drafted_text, end='')
@@ -174,7 +174,6 @@ def create_project_table(headers,data):
     header_row = GREEN + create_row(headers) + RESET
     header_middle_separator = GREEN + lj + bj.join(hline * (w + 2) for w in col_widths) + rj + RESET
 
-    data_top_border = create_separator(tl, tj, tr)
     bottom_border = create_separator(bl, bj, br)
     
     table = []
@@ -187,7 +186,6 @@ def create_project_table(headers,data):
         data_rows.pop()
         table = [
         header_top_border, header_row, header_middle_separator,
-        data_top_border
     ] + data_rows + [bottom_border]
     
     else :
@@ -241,6 +239,7 @@ def create_status_table(status, tasks):
     return '\n'.join(table)
 
 def justify_input(input_string, length=10):
+    str(input_string)
     if isinstance(input_string, list):
         justified_items = []
         for item in input_string:

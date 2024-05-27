@@ -242,14 +242,12 @@ class User:
                                        , tasks=data["tasks"])
 
     def create_project(self):
-        #needs a menu and checking if a project with the same id has been made before
-        #and then make a file and other stuff
         print("please inter an ID:")
         id = globals.get_input_with_cancel()
         if id == None:
             return
         if not os.path.exists(f'Data\\Projects_Data\\{id}'):
-            print("Please inter a title:")
+            print("\nPlease inter a title:")
             title = globals.get_input_with_cancel()
             if title == None:
                 return
@@ -264,6 +262,9 @@ class User:
                     "tasks":[]
                     }
                 json.dump(data,file)
+            self.__leading_projects.append(id)
+            self.__update_file_attributes()
+
         else:
             error_message = ["Error" ,"This id have been chosen befor"]
             globals.print_message(f"{error_message[0]}: {error_message[1]}",color="red")
