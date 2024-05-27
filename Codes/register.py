@@ -13,17 +13,18 @@ def check_password(entered_password , hashed_password):
 
 def check_email_format(email):
     pattern = r'^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outlook|hotmail|live|aol)\.com$'
-    return re.match(pattern, email) is not None
+    return re.match(pattern, email) is not None and ',' not in email
 
 def is_valid_username(username):
     """username should not have special characters"""
-    if not re.match("^[A-Za-z0-9]*$", username):
+    if not re.match("^[A-Za-z0-9,;]*$", username):
         return False
     return True
 
+
 def is_username_length_valid( username):
         """"username is at most 15 characters long"""
-        if len(username) > 15:
+        if len(username) >= 15:
             return False
         return True
 

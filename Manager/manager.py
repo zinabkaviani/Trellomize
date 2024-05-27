@@ -46,7 +46,7 @@ def check_password(entered_password, hashed_password):
     return bcrypt.checkpw(entered_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 def create_admin(username, email_address,password):
-    if admin_exists(username):
+    if admin_exists():
         print("Admin already exists.")
     elif check_existing_username(username=username):
         
@@ -62,14 +62,21 @@ def create_admin(username, email_address,password):
         print("Admin created successfully.")
 
 def admin_exists():
-    return os.path.exists(".\\Manager\\manager.txt")
+    return os.path.exists("manager.json")
 
 def save_admin_to_database(username ,email_address ,encoded_password):
-    with open(".\\Manager\\manager.txt" , "w") as file:
-        file.write(f"{username},{email_address},{encoded_password}\n")
+    with open("Manager\\manager.json" , "w") as file:
+        data = {"username" :username,
+                "email_address" :email_address,
+                "password" :encoded_password} 
+        json.dump(data,file)
+
     if os.path.exists("Data\\Accounts_Data\\users.txt"):
         with open("Data\\Accounts_Data\\users.txt" , "a") as file:
-            file.write(f"{username},{email_address},{encoded_password}\n")
+            file.write(f"{username},{email_address}\n")
+    else :
+        with open("Data\\Accounts_Data\\users.txt","w") as file:
+            file.write(f"{username},{email_address}\n")
 
 def refresh_folder(folder_path):
     if os.path.exists(folder_path):
@@ -90,7 +97,7 @@ def purge_data(username,email,password):
         refresh_folder(".\\Data\\Accounts_Data")
         refresh_folder(".\\Data\\Accounts_Data\\Users")
         refresh_folder(".\\Data\\Projects_Data")
-        with open("Data\\Account_Data\\users.txt","w") as file:
+        with open(".\\Data\\Accounts_Data\\users.txt","w") as file:
             file.write(f"{username},{email}")
         
         data = {
@@ -99,7 +106,7 @@ def purge_data(username,email,password):
             "contributing_projects" : [],
             "is_active": 0
         }
-        with open(f"Data\\Accounts_Data\\Users\\{username}.json","w" ) as file:
+        with open(f".\\Data\\Accounts_Data\\Users\\{username}.json","w" ) as file:
             json.dump(data ,file)
 
 
@@ -130,39 +137,36 @@ if __name__ == "__main__":
 
     elif args.command == 'purge-data':
         if args.username and args.email_address and args.password:
-            if os.path.exists("Manager\\manager.txt"):
-                with open("Manager\\manager.txt" ,"r") as file :
-                    for line in file:
-                        username ,email,password = line.strip().split(",")
-                        if args.username == username and args.email_address == email:
-                            if check_password(entered_password=args.password,hashed_password=password):
-                                purge_data(username=args.username ,email=email ,password= password)
-                        else:
-                            print("Error: username\email or password is incorrect")
+            if os.path.exists("Manager\\manager.json"):
+                with open("Manager\\manager.json" ,"r") as file :
+                    data = json.load(file)
+                    if args.username == data["username"] and args.email_address == data["email_address"]:
+                        if check_password(entered_password=args.password,hashed_password=data["password"]):
+                            purge_data(username=args.username ,email=args.email_address ,password= args.password)
+                    else:
+                        print("Error: username\\email or password is incorrect")
             else:
-                print("Error: username\email or password is incorrect")
+                print("Error: username\\email or password is incorrect")
 
         elif args.username and args.password:
-            if os.path.exists("Manager\\manager.txt"):
-                with open("Manager\\manager.txt" ,"r") as file :
-                    for line in file:
-                        username ,email,password = line.strip().split(",")
-                        if args.username == username:
-                            if check_password(entered_password=args.password,hashed_password=password):
-                                purge_data(username=args.username ,email=email ,password= password)
+            if os.path.exists("manager.json"):
+                with open("Manager\\manager.json" ,"r") as file :
+                    data = json.load(file)
+                    if args.username == data["username"]:
+                        if check_password(entered_password=args.password,hashed_password=data["password"]):
+                                purge_data(username=args.username ,email=data["email_address"] ,password= data["password"])
                         else:
                             print("Error: username or password is incorrect")
             else:
                 print("Error: username or password is incorrect")
 
         elif args.email_address and args.password: 
-            if os.path.exists("Manager\\manager.txt"):
-                with open("Manager\\manager.txt" ,"r") as file :
-                    for line in file:
-                        username ,email,password = line.strip().split(",")
-                        if args.email_address == email:
-                            if check_password(entered_password=args.password,hashed_password=password):
-                                purge_data(username=username ,email=args.email_address ,password= password)
+            if os.path.exists("manager.json"):
+                with open("Manager\\manager.json" ,"r") as file :
+                    data = json.load(file)
+                    if args.email_address == data["email"]:
+                            if check_password(entered_password=args.password,hashed_password=data["email_address"]):
+                                purge_data(username=data["username"] ,email=args.email_address ,password=data["password"])
                             else:
                                 print("Error: email address or password is incorrect")
             else:
