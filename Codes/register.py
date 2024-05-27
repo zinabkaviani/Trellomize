@@ -219,6 +219,3 @@ def account_section():
                 user.user_menu()
         else:
             return
-
-
-account_section()

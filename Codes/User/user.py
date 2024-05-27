@@ -6,7 +6,7 @@ from Project_Task import project
 
 def check_email_format(email):
     pattern = r'^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outlook|hotmail|live|aol)\.com$'
-    return re.match(pattern, email) is not None
+    return re.match(pattern, email) is not None and ',' not in email
 
 def delete_project_from_data(project_id):
     with open(f"Data\\Accounts_Data\\{project_id}\\{project_id}.json" , "r") as project_file:
