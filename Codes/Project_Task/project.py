@@ -43,7 +43,7 @@ class Project :
 
         return formatted_project
 
-    def _update_file_attributes(self):
+    def __update_file_attributes(self):
         data = {
             "id": self.__id,
             "title": self.__title,
@@ -61,9 +61,11 @@ class Project :
         if check_existing_username(member):
             if member not in [*self.__members , self.__leader]:
                 self.__members.append(member)
-                with open(f"Data\\Accounts_Data\\Users\\{member}.json") as file:
+                with open(f"Data\\Accounts_Data\\Users\\{member}.json" , 'r') as file:
                     user_data = globals.json.load(file)
                     user_data["contributing_projects"].append(self.__id)
+                    with open(f"Data\\Accounts_Data\\Users\\{member}.json" , 'w') as updated_file:
+                        globals.json.dump(user_data, updated_file)
                 globals.print_message("Member successfully added to project members",color="green")
                 logger.info(f"User {globals.signed_in_username}: Added member {member} to the project {self.__id}")
             else:
@@ -74,14 +76,14 @@ class Project :
             logger.warning(f"User {globals.signed_in_username}: attempt to add a non-existent user to the project {self.__id}")
             error_messages =["Error" , "The user dose not have an account."]
             globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
-        
+        self.__update_file_attributes()
 
     def remove_members(self) :
         """leader can remove members by chosing between members list via arrow key"""
         indices_list = list(range(len(self.__members) + 1))
-        chosen_index = globals.get_arrow_key_input([*self.__members , "back"],indices_list, display=self.__str__)
+        chosen_index = globals.get_arrow_key_input([*self.__members , "back"],indices_list, display=self)
         if chosen_index != len(self.__members):
-            certain = globals.get_arrow_key_input(["Yes" , "No"] , [0,1],display=self.__str__ + "Are you sure?")
+            certain = globals.get_arrow_key_input(["Yes" , "No"] , [0,1],display= str(self) + "Are you sure?")
             if certain:
                 for task_id in self.__tasks :
                     with open(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{task_id}.json" , 'r') as file :
@@ -105,7 +107,7 @@ class Project :
         available_indices =[0 ,1 ,2 ,3 ,4 ,5]
         while True:
             choice = options[globals.get_arrow_key_input(options=options , available_indices=available_indices,\
-                                                        display= self.__str__+"Please choose the status you want to see its tasks\n")]
+                                                        display= str(self)+"Please choose the status you want to see its tasks\n")]
             os.system("cls")
 
             match choice :
@@ -150,7 +152,7 @@ class Project :
 
         status_tables = {}
         for status in task.Status:
-            tasks_by_status = [task for task in tasks if task[4] == status]
+            tasks_by_status = [task for task in tasks if task[4] == status.name]
             table = globals.create_status_table(status,tasks_by_status)
             status_tables[status.name] = table
 
@@ -202,10 +204,10 @@ class Project :
         available_tasks.append("Back")
         available_indices = list(range(len(available_tasks)))
         while True:
-            chosen_index = globals.get_arrow_key_input(options=available_tasks,available_indices= available_indices,display=self.__str__)
+            chosen_index = globals.get_arrow_key_input(options=available_tasks,available_indices= available_indices,display=str(self))
             
             if chosen_index != len(available_tasks) - 1:
-                input = globals.get_arrow_key_input(options=["yes","no"],available_indices=[0,1],display=self.__str__ + "Are you sure about this?")
+                input = globals.get_arrow_key_input(options=["yes","no"],available_indices=[0,1],display= str(self) + "Are you sure about this?")
                 if input == 0 :
                     globals.os.remove(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{self.__tasks[chosen_index]}.json")
                     logger.info(f"User {globals.signed_in_username}: removed the task {self.__tasks[chosen_index]} from the project {self.__id}")
@@ -226,7 +228,7 @@ class Project :
                 available_tasks.append(data["title"] + 10 * ' ' + task_id + '\n'  + data["description"])
         available_tasks.append("Back")
         available_indices = list(range(len(available_tasks)))
-        chosen_index = globals.get_arrow_key_input(options=available_tasks,available_indices= available_indices,display=self.__str__)         
+        chosen_index = globals.get_arrow_key_input(options=available_tasks,available_indices= available_indices,display=self)         
         if chosen_index != len(self.__tasks):
             choice = self.__tasks[chosen_index]
         if choice != None:
@@ -295,10 +297,10 @@ class Project :
             indices_list = list(range(len(options)))
             choice = None
             if self.__leader == globals.signed_in_username :
-                choice = options[globals.get_arrow_key_input(options ,indices_list , display=self.__str__())]
+                choice = options[globals.get_arrow_key_input(options ,indices_list , display=self)]
             else :
                 available_indices = [2 ,5 ,6 ,7] 
-                choice = options[globals.get_arrow_key_input(options ,available_indices, display=self.__str__ )]
+                choice = options[globals.get_arrow_key_input(options ,available_indices, display=self )]
 
             match choice :
                 case "Add Member":

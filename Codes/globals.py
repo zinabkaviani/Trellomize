@@ -113,7 +113,7 @@ def get_added_time(start_time, **keyword):
     # hours
     # weeks
     delta = datetime.timedelta(**keyword)
-    end_time = datetime.strptime(start_time,"%Y-%m-%d %H:%M:%S") + delta
+    end_time = datetime.datetime.strptime(start_time,"%Y-%m-%d %H:%M:%S") + delta
     return end_time.strftime("%Y-%m-%d %H:%M:%S")
 
 def get_input_with_cancel(drafted_text = ""):
@@ -172,7 +172,7 @@ def create_project_table(headers,data):
 
     header_top_border = GREEN + tl + tj.join(hline * (w + 2) for w in col_widths) + tr + RESET
     header_row = GREEN + create_row(headers) + RESET
-    header_middle_separator = GREEN + lj + bj.join(hline * (w + 2) for w in col_widths) + rj + RESET
+    header_middle_separator = GREEN + lj + mj.join(hline * (w + 2) for w in col_widths) + rj + RESET
 
     bottom_border = create_separator(bl, bj, br)
     
@@ -189,7 +189,7 @@ def create_project_table(headers,data):
     ] + data_rows + [bottom_border]
     
     else :
-        table = [header_top_border, header_row, header_middle_separator] 
+        table = [header_top_border, header_row, GREEN + bottom_border + RESET] 
     return '\n'.join(table)
 
 

@@ -4,7 +4,7 @@ import os
 import shutil
 import re
 import json
-from Codes.logfile import logger
+# from ..Codes.logfile import logger
 
 def check_existing_username(username):
     if os.path.exists("Data\\Accounts_Data\\users.txt"):
@@ -48,32 +48,40 @@ def check_password(entered_password, hashed_password):
 
 def create_admin(username, email_address,password):
     if admin_exists():
-        logger.error("Attemmpt to create an admin account when theres one already")
+        # logger.error("Attemmpt to create an admin account when theres one already")
         print("Admin already exists.")
     elif check_existing_username(username=username):
-        logger.warning("Attempt to make an admin with the already used username")
+        # logger.warning("Attempt to make an admin with the already used username")
         error_messages = ["Error", "Username already exists."]
         print(f"{error_messages[0]}: {error_messages[1]}")
             
     elif check_existing_email(email_address):
-        logger.warning("Attempt to make an admin with the already used email address")
+        # logger.warning("Attempt to make an admin with the already used email address")
         error_messages =["Error" , "Email address already exists."]
         print(f"{error_messages[0]}: {error_messages[1]}")
     else:
         save_admin_to_database(username=username ,email_address=email_address ,encoded_password=encode_password(password).decode("utf-8"))
-        logger.info("Admin created successfuly")
+        # logger.info("Admin created successfuly")
         print("Admin created successfully.")
 
 def admin_exists():
     return os.path.exists("manager.json")
 
 def save_admin_to_database(username ,email_address ,encoded_password):
+    data = {"username" :username,
+            "email_address" :email_address,
+            "password" :encoded_password} 
     with open("Manager\\manager.json" , "w") as file:
-        data = {"username" :username,
-                "email_address" :email_address,
-                "password" :encoded_password} 
         json.dump(data,file)
 
+    with open(f"Data\\Accounts_Data\\Users\\{username}.json" , "w") as file:
+        user_data = {
+            "account": data,
+            "leading_projects": [],
+            "contributing_projects": [],
+            "is_active": 0
+        }
+        json.dump(user_data,file)
     if os.path.exists("Data\\Accounts_Data\\users.txt"):
         with open("Data\\Accounts_Data\\users.txt" , "a") as file:
             file.write(f"{username},{email_address}\n")
@@ -97,7 +105,7 @@ def refresh_folder(folder_path):
 def purge_data(username,email,password):
 
     if input("Are you sure about this?(enter Yes if you are and anything else if not): ") == "Yes":
-        logger.warning("Data purged by the Admin")
+        # logger.warning("Data purged by the Admin")
         refresh_folder(".\\Data\\Accounts_Data")
         refresh_folder(".\\Data\\Accounts_Data\\Users")
         refresh_folder(".\\Data\\Projects_Data")
@@ -131,16 +139,16 @@ if __name__ == "__main__":
                     if check_email_format(args.email_address):
                         create_admin(args.username,args.email_address, args.password )
                     else:
-                        logger.warning("Attempt to creat admin with wrong email format")
+                        # logger.warning("Attempt to creat admin with wrong email format")
                         print("Error: email format is incorrect")
                 else:
-                    logger.warning("Attempt to create admin with wrong username format")
+                    # logger.warning("Attempt to create admin with wrong username format")
                     print("Error: username can't be more than 15 character")
             else:
-                logger.warning("Attempt to create admin with wrong username format")
+                # logger.warning("Attempt to create admin with wrong username format")
                 print("Error: username can't contain special characters")
         else:
-            logger.info("Attempt to create admin without enough arguements")
+            # logger.info("Attempt to create admin without enough arguements")
             print("Error: not enough arguments")
 
     elif args.command == 'purge-data':
@@ -152,10 +160,10 @@ if __name__ == "__main__":
                         if check_password(entered_password=args.password,hashed_password=data["password"]):
                             purge_data(username=args.username ,email=args.email_address ,password= args.password)
                     else:
-                        logger.error("Failed attempt to login to the admin account")
+                        # logger.error("Failed attempt to login to the admin account")
                         print("Error: username\\email or password is incorrect")
             else:
-                logger.error("Failed attempt to login to the admin account")
+                # logger.error("Failed attempt to login to the admin account")
                 print("Error: username\\email or password is incorrect")
 
         elif args.username and args.password:
@@ -166,10 +174,10 @@ if __name__ == "__main__":
                         if check_password(entered_password=args.password,hashed_password=data["password"]):
                                 purge_data(username=args.username ,email=data["email_address"] ,password= data["password"])
                         else:
-                            logger.error("Failed attempt to login to the admin account")
+                            # logger.error("Failed attempt to login to the admin account")
                             print("Error: username or password is incorrect")
             else:
-                logger.error("Failed attempt to login to the admin account")
+                # logger.error("Failed attempt to login to the admin account")
                 print("Error: username or password is incorrect")
 
         elif args.email_address and args.password: 
@@ -180,13 +188,13 @@ if __name__ == "__main__":
                             if check_password(entered_password=args.password,hashed_password=data["email_address"]):
                                 purge_data(username=data["username"] ,email=args.email_address ,password=data["password"])
                             else:
-                                logger.error("Failed attempt to login to the admin account")
+                                # logger.error("Failed attempt to login to the admin account")
                                 print("Error: email address or password is incorrect")
             else:
-                logger.error("Failed attempt to login to the admin account")
+                # logger.error("Failed attempt to login to the admin account")
                 print("Error: email address or password is incorrect")
 
         else:
-            logger.warning("Attempt to purge data without enough arguements")
+            # logger.warning("Attempt to purge data without enough arguements")
             print("Error: not enough arguments")
     

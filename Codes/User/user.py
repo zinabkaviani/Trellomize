@@ -38,6 +38,15 @@ def check_existing_email(email_address):
                     return True
     return False
 
+def admin_email_check(user_email_address):
+
+    if os.path.exists("Manager\\manager.json"):
+        with open("Manager\\manager.json","r")as file:
+            admin_data = globals.json.load(file)
+            if user_email_address == admin_data["email_address"]:
+                return True
+    return False  
+
 
 class Account:
     
@@ -64,7 +73,7 @@ class Account:
             return "Account deleted"
         
     def delete_user(self):
-        if globals.is_admin:
+        if globals.user_is_admin:
             os.remove("Manager\\managr.txt")
         with open("Data\\Accounts_Data\\users.txt", "r") as file:
             lines = file.readlines()
@@ -73,10 +82,10 @@ class Account:
                     username , _ = line.strip().split(',')
                     if username != self.__username:
                         new_file.write(line)
-        with open(f"Data\\Accounts_Data\\{self.__username}.json", "r") as file:
+        with open(f"Data\\Accounts_Data\\Users\\{self.__username}.json", "r") as file:
             data = json.load(file)
             for project_id in data["contributing_projects"]:
-                with open(f"Data\\Accounts_Data\\{project_id}\\{project_id}.json" , 'r') as project_file:
+                with open(f"Data\\Project_Data\\{project_id}\\{project_id}.json" , 'r') as project_file:
                     project_data = json.load(project_file)
                     project_data["members"].remove(self.__username)
                     for task_id in project_data["tasks"]:
@@ -86,9 +95,9 @@ class Account:
                             task_data["candidates_for_assignment"].remove(self.__username)
                             with open(f"Data\\Projects_Data\\{project_id}\\Project_Tasks\\{task_id}.json" , 'w') as updated_file :
                                 globals.json.dump(task_data,updated_file)
-            for project_id in data["leading_project"]:
+            for project_id in data["leading_projects"]:
                 delete_project_from_data(project_id=project_id)
-        os.remove(f"Data\\Accounts_Data\\{self.__username}.json")
+        os.remove(f"Data\\Accounts_Data\\Users\\{self.__username}.json")
 
 
     def account_setting_menu(self) :
@@ -104,6 +113,8 @@ class Account:
                 case "Delete User" :
                     return self.delete_user()
                 case "Sign Out" :
+                    globals.user_is_admin = False
+                    logger.info(f"User {globals.signed_in_username}: Has signed out")
                     return "sign out"
                 case "Back" :
                     return "back"
@@ -141,7 +152,16 @@ class Account:
                             file.write(f"{self.__username},{new_email}\n")
                         else:
                            file.write(line)
+                self.__email_address = new_email
                 self.__update_file_attributes()
+                if globals.user_is_admin:
+                    with open("Manager\\manager.json" , "w") as file:
+                        data = {
+                            "username": self.__username,
+                            "email_address": self.__email_address,
+                            "password": self.__password
+                            }
+                        globals.json.dump(data , file)
                 logger.info(f"User {self.__username}: Email address updated successfully")
                 globals.print_message("Email address updated successfully.", color="green")
 
@@ -183,7 +203,7 @@ class User:
     def display_projects(self):
         
         """opens the files of both types of projects the user has and then shows the details"""
-        print("Leading Projects")
+        print("Leading Projects:")
         all_leading_projects_data =[]
         for project_id in self.__leading_projects:
             with open(f'Data\\Projects_Data\\{project_id}\\{project_id}.json', 'r') as file:
@@ -194,7 +214,7 @@ class User:
         print(globals.create_project_table(headers=headers,data=all_leading_projects_data))
         
         
-        print("Contributing Projects :")
+        print("Contributing Projects:")
         all_contributing_projects_data =[]         
         for project in self.__contributing_projects:
             with open(f'Data\\Projects_Data\\{project}\\{project}.json', 'r') as file:
@@ -240,9 +260,10 @@ class User:
     def choose_contributing_projects(self):
         options = []
         for project_id in self.__contributing_projects:
-            with open(f'Data\\Projects_Data\\{project_id}\\{project_id}.json' , 'w') as file:
+            with open(f'Data\\Projects_Data\\{project_id}\\{project_id}.json' , 'r') as file:
                 data = json.load(file)
                 options.append(f"{data["title"]}      {data["id"]}      {data["leader"]}")
+        options.append("Back")
         choice = globals.get_arrow_key_input(options=options, available_indices=list(range(len(options))))    
         if choice != len(options) - 1:
             globals.project_id= self.__contributing_projects[choice]
@@ -300,12 +321,17 @@ class User:
                 self.user_activation()
             elif choice == 1:
                 self.user_deactivation()
-
+            else:
+                return
     @staticmethod
     def user_deactivation():
         print("Enter a username or email address to deactivate the User: (cancel with Esc):")
         user = globals.get_input_with_cancel()
         if user != None:
+            if user == globals.signed_in_username or admin_email_check(user):
+                logger.error("Attempt to deactivate admin")
+                globals.print_message("You cannot deactivate yourself" , "red")
+                return
             if check_email_format(user):
                 with open("Data\\Accounts_Data\\users.txt", "r") as file:
                     for line in file:
@@ -315,13 +341,13 @@ class User:
                                 data = json.load(file)
                                 if data["is_active"] == 0:
                                     logger.info(f"Admin has deactivated the user {data["username"]}")
+                                    globals.print_message(f"User {username} has been deactivated" , color="green")
                                     data["is_active"] = 1
                                 else:
+                                    logger.warning(f"Attempt to deactivate the user {username} again")
                                     globals.print_message(f"Error: User {username} has already been deactivated", color="red")
                                 with open(f"Data\\Accounts_Data\\Users\\{username}.json" , 'w') as new_file:
                                     json.dump(data,new_file)
-                            logger.warning((f"User {username} has been deactivated"))
-                            globals.print_message(f"User {username} has been deactivated" , color="green")
                             return
                 logger.warning(f"No User with the email address {user} Exists")
                 globals.print_message(f"Error: No User with the email address {user} Exists", color="red")
@@ -329,11 +355,16 @@ class User:
                 if os.path.exists(f"Data\\Accounts_Data\\Users\\{user}.json"):
                     with open(f"Data\\Accounts_Data\\Users\\{user}.json" , 'r') as file:
                         data = json.load(file)
-                        data["is_active"] = 1
-                        with open(f"Data\\Accounts_Data\\Users\\{user}.json" , 'w') as new_file:
-                            json.dump(data,new_file)
-                    logger.info(f"User {user} has been deactivated")
-                    globals.print_message(f"Error: User {user} has been deactivated", color="red")
+                        if data["is_active"] == 0:
+                            logger.info(f"User {user} has been deactivated")
+                            globals.print_message(f"User {user} has been deactivated", color="green")
+                            data["is_active"] = 1
+                            with open(f"Data\\Accounts_Data\\Users\\{user}.json" , 'w') as new_file:
+                                json.dump(data,new_file)
+                        else:
+                            logger.warning(f"Attempt to deactivate the user {user} again")
+                            globals.print_message(f"Error: User {user} has already been deactivated", color="red")
+                            
                     return
                 logger.warning(f"No User with the username {user} Exists")
                 globals.print_message(f"Error: No User with the username {user} Exists", color="red")
@@ -358,7 +389,7 @@ class User:
                                     return
                                 with open(f"Data\\Accounts_Data\\Users\\{username}.json" , 'w') as new_file:
                                     json.dump(data,new_file)
-                            logger.warning(f"User {username} has been activated")
+                            logger.info(f"User {username} has been activated")
                             globals.print_message(f"User {username} has been activated" , color="green")
                             return
                 logger.warning(f"No User with the email address {user} Exists")
@@ -382,9 +413,10 @@ class User:
 
 
     def user_menu(self) :
-        options = ["Display Projects", "Add Project" , "Choose Project" , "Delete Project" , "Account Setting"]
+        options = ["Display Projects", "Add Project" , "Choose Project" , "Delete Project"]
         if globals.user_is_admin:
             options.append("Users Management")
+        options.append("Account Setting")
         indices_list = list(range(len(options)))
         while True:
             choice =options[globals.get_arrow_key_input(options,indices_list)]
@@ -410,8 +442,6 @@ class User:
                         return 
                     elif selected_option == "back" :
                         continue
-                    elif selected_option == "email changed":
-                        self.__update_file_attributes()
                     elif selected_option == "Account deleted":
                         del self
                         return

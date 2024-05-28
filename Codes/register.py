@@ -49,22 +49,20 @@ def check_existing_email(email_address):
     
 def admin_username_check(user_username):
 
-    if os.path.exists("Manager\\manager.txt"):
-        with open("Manager\\manager.txt","r")as file:
-            for line in file:
-                admin_username , email = line.strip().split(",")
-                if user_username == admin_username:
-                    return True
+    if os.path.exists("Manager\\manager.json"):
+        with open("Manager\\manager.json","r")as file:
+            admin_data = globals.json.load(file)
+            if user_username == admin_data["username"]:
+                return True
     return False
 
 def admin_email_check(user_email_address):
 
-    if os.path.exists("Manager\\manager.txt"):
-        with open("Manager\\manager.txt","r")as file:
-            for line in file:
-                username , admin_email_address = line.strip().split(",")
-                if user_email_address == admin_email_address:
-                    return True
+    if os.path.exists("Manager\\manager.json"):
+        with open("Manager\\manager.json","r")as file:
+            admin_data = globals.json.load(file)
+            if user_email_address == admin_data["email_address"]:
+                return True
     return False  
         
 def register():
