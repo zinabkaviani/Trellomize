@@ -1,15 +1,15 @@
 import bcrypt
-import globals
-import User.user as user
+from Codes import globals
+import Codes.User.user as user
 import re
 import os
-
+from Codes.logfile import logger
 
 def encode_password(password_input):
-      return bcrypt.hashpw(password_input.encode('utf-8'), bcrypt.gensalt())
+    return bcrypt.hashpw(password_input.encode('utf-8'), bcrypt.gensalt())
      
 def check_password(entered_password , hashed_password):
-       return bcrypt.checkpw(entered_password.encode('utf-8'), hashed_password.encode('utf-8'))
+    return bcrypt.checkpw(entered_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 def check_email_format(email):
     pattern = r'^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outlook|hotmail|live|aol)\.com$'
@@ -101,21 +101,25 @@ def register():
         if check_email_format( email_address) == True:
 
             if check_existing_username(username):
+                logger.info("User attempted to register with existing username")
                 error_messages = ["Error", "Username already exists."]
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
             
             elif check_existing_email(email_address) :
+                logger.info("User attempted to register with existing email_address")
                 error_messages =["Error" , "Email address already exists."]
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
     
             else:
                 with open("Data\\Accounts_Data\\users.txt", "a") as file:
                     file.write(f"{username},{email_address}\n")
+                logger.info(f"{username}: Account successfully created.")
                 globals.print_message("Account successfully created.", color="green")
                 password = encode_password(password)
                 password = password.decode('utf8')
                 break
         else :
+            logger.warning("Input email format is incorrect")
             error_messages =["Error" , "Email format is incorrect."]
             globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
           
@@ -131,7 +135,7 @@ def register():
     with open(f"Data\\Accounts_Data\\Users\\{username}.json","w" ) as file:
         globals.json.dump(data ,file)
     globals.signed_in_username = username
-    
+    logger.info(f"User {username}: Account has been created successfuly")
     return user.User(account=user.Account(username=username , email_address = email_address ,password=password),\
                      contributing_projects=[],leading_projects=[])
 
@@ -160,17 +164,28 @@ def Log_in():
                                                 
                             if check_password(entered_password=password ,hashed_password= user_data["account"]["password"]):
                                 if admin_email_check(name):
+                                    logger.info("Admin logged in successfuly")
                                     globals.user_is_admin = True
-                                if user_data["is_active"] == 0:
                                     globals.signed_in_username = username
                                     return user.User(account=user.Account(username=username , email_address = email_address,\
                                                                             password=user_data["account"]["password"]),contributing_projects=user_data["contributing_projects"],\
                                                                             leading_projects=user_data["leading_projects"])
-                                
+                                if user_data["is_active"] == 0:
+                                    logger.info(f"User {username}: logged in successfuly")
+                                    globals.signed_in_username = username
+                                    return user.User(account=user.Account(username=username , email_address = email_address,\
+                                                                            password=user_data["account"]["password"]),contributing_projects=user_data["contributing_projects"],\
+                                                                            leading_projects=user_data["leading_projects"])
+
+                            elif admin_email_check(name):
+                                logger.error("Failed attempt to login as admin")
                     error_messages =["Error" , "Email address or Password is incorrect"]
+                    log_message = f"Failed attempt to login with email {name}"
                     if user_data != None:
                         if user_data["is_active"] == 1:
                             error_messages = ["Banned" , "Your account has been deactivated by the admin"]
+                            log_message = "Attempt to login to a Banned account"
+                    logger.warning(log_message)
                     globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
                     
                     
@@ -186,23 +201,33 @@ def Log_in():
                             if check_password(entered_password=password ,hashed_password= user_data["account"]["password"]):
                                 if admin_username_check(name):
                                     globals.user_is_admin = True
+                                    globals.signed_in_username = username
+                                    logger.info("Admin logged in successfuly")
+                                    return user.User(account=user.Account(username=username , email_address = email_address,\
+                                                                        password=user_data["account"]["password"]),contributing_projects=user_data["contributing_projects"],\
+                                                                        leading_projects=user_data["leading_projects"])
                                 if user_data["is_active"] == 0:
                                     globals.signed_in_username = username
+                                    logger.info(f"User {username}: logged in successfuly")
                                     return user.User(account=user.Account(username=username , email_address = email_address,\
                                                                         password=user_data["account"]["password"]),contributing_projects=user_data["contributing_projects"],\
                                                                         leading_projects=user_data["leading_projects"])
 
+                            elif admin_username_check(name):
+                                logger.error("Failed attempt to login as admin")
                     error_messages =["Error" , "Username or Password is incorrect"]
+                    log_message = f"Failed attempt to login with username {name}"
                     if user_data != None:
                         if user_data["is_active"] == 1:
                             error_messages = ["Banned" , "Your account has been deactivated by the admin"]
+                            log_message = "Attempt to login to a Banned account"
+                    logger.warning(log_message)
                     globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
                     
-                                
                 
 
 def account_section():
-            
+    logger.info("Application has Started")
     options = ["Sign Up", "Log in" , "Exit"]
     available_indices = [0, 1 , 2]
     user = None
@@ -218,4 +243,5 @@ def account_section():
             if user != None:
                 user.user_menu()
         else:
+            logger.info("Application has been killed")
             return

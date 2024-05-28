@@ -1,7 +1,7 @@
-import globals
-from Project_Task import task
+from Codes import globals
+from Codes.Project_Task import task
 import os
-
+from Codes.logfile import logger
 
 def check_existing_username(username,file_path="Data\\Accounts_Data\\users.txt"):
     if os.path.exists(path=file_path):
@@ -42,6 +42,7 @@ class Project :
         formatted_project += lower_line + '\n'
 
         return formatted_project
+
     def _update_file_attributes(self):
         data = {
             "id": self.__id,
@@ -64,10 +65,13 @@ class Project :
                     user_data = globals.json.load(file)
                     user_data["contributing_projects"].append(self.__id)
                 globals.print_message("Member successfully added to project members",color="green")
+                logger.info(f"User {globals.signed_in_username}: Added member {member} to the project {self.__id}")
             else:
                 error_messages = ["Error" , "The user is already a member of the Project"]
+                logger.warning(f"User {globals.signed_in_username}: attempted to add someone who is already a member to the project {self.__id}")
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
         else :
+            logger.warning(f"User {globals.signed_in_username}: attempt to add a non-existent user to the project {self.__id}")
             error_messages =["Error" , "The user dose not have an account."]
             globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
         
@@ -89,6 +93,7 @@ class Project :
                 with open(f"Data\\Accounts_Data\\Users\\{self.__members[chosen_index]}.json") as file:
                     user_data = globals.json.load(file)
                     user_data["contributing_projects"].remove(self.__id)
+                logger.info(f"User {globals.signed_in_username}: removed the member {self.__members[chosen_index]} from the project {self.__id}")
                 self.__members.remove(self.__members[chosen_index])
                 self.__update_file_attributes()
                 globals.print_message("Member successfully removed from project members",color="green")
@@ -182,6 +187,7 @@ class Project :
             }
             globals.json.dump(data,file)
         self.__tasks.append(rand_id)
+        logger.info(f"User {globals.signed_in_username}: add the task {rand_id} to the project {self.__id}")
         self.__update_file_attributes()
 
     def remove_tasks(self) :
@@ -202,6 +208,7 @@ class Project :
                 input = globals.get_arrow_key_input(options=["yes","no"],available_indices=[0,1],display=self.__str__ + "Are you sure about this?")
                 if input == 0 :
                     globals.os.remove(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{self.__tasks[chosen_index]}.json")
+                    logger.info(f"User {globals.signed_in_username}: removed the task {self.__tasks[chosen_index]} from the project {self.__id}")
                     self.__tasks.remove(self.__tasks[chosen_index])
                     self.__update_file_attributes()
                     return
@@ -250,6 +257,7 @@ class Project :
         available_indices = [0 ,1]
         answer = options[ globals.get_arrow_key_input(options=options ,available_indices=available_indices,display="Are you sure about this?")]
         if answer == "yes":
+            logger.info(f"User {globals.signed_in_username}: left the project {self.__id}")
             self.leaving_projects()  
             return "leave"   
          

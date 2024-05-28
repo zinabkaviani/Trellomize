@@ -1,15 +1,16 @@
 import json
 import os
-import globals
+from Codes import globals
 import re
-from Project_Task import project
+from Codes.logfile import logger
+from Codes.Project_Task import project
 
 def check_email_format(email):
     pattern = r'^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outlook|hotmail|live|aol)\.com$'
     return re.match(pattern, email) is not None and ',' not in email
 
 def delete_project_from_data(project_id):
-    with open(f"Data\\Accounts_Data\\{project_id}\\{project_id}.json" , "r") as project_file:
+    with open(f"Data\\Projects_Data\\{project_id}\\{project_id}.json" , "r") as project_file:
         project_data= json.load(project_file)
         for member in project_data["members"]:
             with open(f"Data\\Accounts_Data\\Users\\{member}.json" , "r") as file :
@@ -56,6 +57,10 @@ class Account:
         choice = globals.get_arrow_key_input(options=["Yes" , "No"],available_indices=[0 , 1])
         if choice == 0:
             self.delete_user()
+            if globals.user_is_admin:
+                logger.info(f"Admin: Delete account")
+            else:
+                logger.info(f"User {self.__username}: Delete account")
             return "Account deleted"
         
     def delete_user(self):
@@ -122,7 +127,8 @@ class Account:
                 return
             if not check_email_format(new_email):
                 error_messages =["Error" , "Email format is incorrect."]
-                globals.print_message()
+                logger.info(f"User {self.__username}: input incorrect email format")
+                globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color="red")
                 return
 
             if not check_existing_email(new_email):
@@ -136,12 +142,16 @@ class Account:
                         else:
                            file.write(line)
                 self.__update_file_attributes()
+                logger.info(f"User {self.__username}: Email address updated successfully")
                 globals.print_message("Email address updated successfully.", color="green")
 
             else:
+                log_message = f"User {self.__username}: Email {new_email} already exists can't change email"
                 error_messages =["Error" , "Email address already exists."]
                 if new_email == self.__email_address:
+                    log_message = f"User {self.__username}: attempt to change email to its self"
                     error_messages = ["Error" , "This already is your Email address"]
+                logger.warning(log_message)
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
 
 
@@ -264,8 +274,9 @@ class User:
                 json.dump(data,file)
             self.__leading_projects.append(id)
             self.__update_file_attributes()
-
+            logger.info(f"User {globals.signed_in_username}: created the project {id}")
         else:
+            logger.warning(f"User {globals.signed_in_username}: attempt to create already existing project")
             error_message = ["Error" ,"This id have been chosen befor"]
             globals.print_message(f"{error_message[0]}: {error_message[1]}",color="red")
 
@@ -273,11 +284,13 @@ class User:
     def delete_project(self) :
         while True:
             choice = globals.get_arrow_key_input([*self.__leading_projects , "Back"] , list(range(len(self.__leading_projects) + 1)))
+            if choice == len(self.__leading_projects):
+                return
             certain = 1 - globals.get_arrow_key_input(["Yes" , "No"] , available_indices= [0 , 1])
-            if choice != len(self.__leading_projects):
-                if certain:
-                    delete_project_from_data(self.__leading_projects[choice])
-            else:
+            if certain:
+                logger.info(f"User {globals.signed_in_username}: deleted the project {self.__leading_projects[choice]}")
+                delete_project_from_data(self.__leading_projects[choice])
+                self.__leading_projects.remove(self.__leading_projects[choice])
                 return
 
     def users_management(self):
@@ -301,14 +314,17 @@ class User:
                             with open(f"Data\\Accounts_Data\\Users\\{username}.json" , 'r') as file:
                                 data = json.load(file)
                                 if data["is_active"] == 0:
+                                    logger.info(f"Admin has deactivated the user {data["username"]}")
                                     data["is_active"] = 1
                                 else:
-                                    globals.print_message(f"User {username} has already been deactivated")
+                                    globals.print_message(f"Error: User {username} has already been deactivated", color="red")
                                 with open(f"Data\\Accounts_Data\\Users\\{username}.json" , 'w') as new_file:
                                     json.dump(data,new_file)
-                            globals.print_message(f"User {username} has been deactivated")
+                            logger.warning((f"User {username} has been deactivated"))
+                            globals.print_message(f"User {username} has been deactivated" , color="green")
                             return
-                globals.print_message(f"No User with the email address {user} Exists")
+                logger.warning(f"No User with the email address {user} Exists")
+                globals.print_message(f"Error: No User with the email address {user} Exists", color="red")
             else:
                 if os.path.exists(f"Data\\Accounts_Data\\Users\\{user}.json"):
                     with open(f"Data\\Accounts_Data\\Users\\{user}.json" , 'r') as file:
@@ -316,9 +332,11 @@ class User:
                         data["is_active"] = 1
                         with open(f"Data\\Accounts_Data\\Users\\{user}.json" , 'w') as new_file:
                             json.dump(data,new_file)
-                    globals.print_message(f"User {user} has been deactivated")
+                    logger.info(f"User {user} has been deactivated")
+                    globals.print_message(f"Error: User {user} has been deactivated", color="red")
                     return
-                globals.print_message(f"No User with the username {user} Exists")
+                logger.warning(f"No User with the username {user} Exists")
+                globals.print_message(f"Error: No User with the username {user} Exists", color="red")
 
     @staticmethod
     def user_activation():
@@ -335,13 +353,16 @@ class User:
                                 if data["is_active"] == 1:
                                     data["is_active"] = 0
                                 else:
-                                    globals.print_message(f"User {username} has not been deactivated")
+                                    logger.info(f"User {username} has not been deactivated")
+                                    globals.print_message(f"Error: User {username} has not been deactivated")
                                     return
                                 with open(f"Data\\Accounts_Data\\Users\\{username}.json" , 'w') as new_file:
                                     json.dump(data,new_file)
-                            globals.print_message(f"User {username} has been activated")
+                            logger.warning(f"User {username} has been activated")
+                            globals.print_message(f"User {username} has been activated" , color="green")
                             return
-                globals.print_message(f"No User with the email address {user} Exists")
+                logger.warning(f"No User with the email address {user} Exists")
+                globals.print_message(f"Error: No User with the email address {user} Exists", color="red")
             else:
                 if os.path.exists(f"Data\\Accounts_Data\\Users\\{user}.json"):
                     with open(f"Data\\Accounts_Data\\Users\\{user}.json" , 'r') as file:
@@ -349,13 +370,15 @@ class User:
                         if data["is_active"] == 1:
                             data["is_active"] = 0
                         else:
-                            globals.print_message(f"The user with the username {user} has not been deactivated")
+                            globals.print_message(f"Error: The user with the username {user} has not been deactivated" , color="red")
                             return
                         with open(f"Data\\Accounts_Data\\Users\\{user}.json" , 'w') as new_file:
                             json.dump(data,new_file)
-                    globals.print_message(f"User {user} has been deactivated")
+                    logger.warning(f"User {user} has been deactivated")
+                    globals.print_message(f"Error: User {user} has been deactivated", color="green")
                     return
-                globals.print_message(f"No User with the username {user} Exists")
+                logger.warning(f"No User with the username {user} Exists")
+                globals.print_message(f"Error: No User with the username {user} Exists" , color="red")
 
 
     def user_menu(self) :
