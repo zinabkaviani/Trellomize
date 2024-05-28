@@ -1,7 +1,7 @@
 import pytest
 import bcrypt
 from unittest import mock
-from register import encode_password,check_password ,check_email_format, is_valid_username, is_username_length_valid,\
+from Codes.register import encode_password,check_password ,check_email_format, is_valid_username, is_username_length_valid,\
                      check_existing_username, check_existing_email, admin_username_check, admin_email_check
 
 def test_encode_password():

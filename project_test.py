@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from Project_Task.project import Project,check_existing_username
+from Codes.Project_Task.project import Project,check_existing_username
 
 # Mocking the globals module
 class MockGlobals:

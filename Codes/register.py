@@ -24,7 +24,7 @@ def is_valid_username(username):
 
 def is_username_length_valid( username):
         """"username is at most 15 characters long"""
-        if len(username) >= 15:
+        if len(username) >= 15 or len(username) == 0:
             return False
         return True
 
@@ -78,10 +78,12 @@ def register():
         if username == None:
             return
         if not is_username_length_valid(username=username):
-            error_messages =["Error" , "Username should be less than 15 character."]
+            logger.info("Attempt to register with invalid length")
+            error_messages =["Error" , "Username should be less than 15 character and not empty."]
             globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
             continue
         if not is_valid_username(username=username):
+            logger.info("attempt to register with invalid characters")
             error_messages =["Error" , "Username can't have special character."]
             globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
             continue
@@ -95,6 +97,11 @@ def register():
         password = globals.get_input_with_cancel()
         if password == None :
             return
+        
+        if len(password) < 6:
+            logger.warning("Attempt to make an account with less than 6 characters password")
+            globals.print_message("Error: Your password must be atleast 6 characters" , color="red")
+            continue
         
         if check_email_format( email_address) == True:
 
@@ -111,7 +118,7 @@ def register():
             else:
                 with open("Data\\Accounts_Data\\users.txt", "a") as file:
                     file.write(f"{username},{email_address}\n")
-                logger.info(f"{username}: Account successfully created.")
+                logger.info(f"User {username}: Account successfully created.")
                 globals.print_message("Account successfully created.", color="green")
                 password = encode_password(password)
                 password = password.decode('utf8')

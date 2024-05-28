@@ -76,17 +76,19 @@ def print_message(message, color= "reset"):
     max_length = len(max(message.split('\n'), key=len))
     border = '╭' + '─' * (max_length + 8) + '╮'
     color_code = None
+    message_lines = message.split('\n')
     if color == "reset":
         color_code = attr(0)
     else:
         color_code = fg(color)
     reset_color = attr(0)
-
-    colored_message = f"{color_code}{message}{reset_color}"  # Apply color to the message
     print("\n")
     print(border)
-    print(f'│ {colored_message:<{max_length}}       │')  # Removed color from the border
+    for line in message_lines:
+        colored_message = f"{color_code}{line}{reset_color}"  # Apply color to the message
+        print(f'│ {colored_message:<{max_length}}       │')  # Removed color from the border
     print('╰' + '─' * (max_length + 8) + '╯')
+    print("press anything to continue")
     getch()
 
 

@@ -56,7 +56,7 @@ class Project :
 
     def add_member(self) :
         """leader can add members via username"""
-        print("Please inter member's username to add :")
+        print("Please enter member's username to add :")
         member = globals.get_input_with_cancel()
         if check_existing_username(member):
             if member not in [*self.__members , self.__leader]:
@@ -160,11 +160,11 @@ class Project :
     
     def add_tasks(self) :
         """leader can add tasks and allocates them to members """
-        print("Please inter a title for the task : ")
+        print("Please enter a title for the task : ")
         title = globals.get_input_with_cancel()
         if title == None:
             return
-        print("\nPlease inter a description for the task : ")
+        print("\nPlease enter a description for the task : ")
         des = globals.get_input_with_cancel()
         if des == None:
             return

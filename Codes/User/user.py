@@ -205,8 +205,9 @@ class User:
         """opens the files of both types of projects the user has and then shows the details"""
         print("Leading Projects:")
         all_leading_projects_data =[]
-        for project_id in self.__leading_projects:
-            with open(f'Data\\Projects_Data\\{project_id}\\{project_id}.json', 'r') as file:
+        for project in self.__leading_projects:
+            with open(f'Data\\Projects_Data\\{project}\\{project}.json', 'r') as file:
+                print(file.name)
                 data = json.load(file)
                 project_data = [data["id"],data["title"],data["leader"]]
                 all_leading_projects_data.append(project_data)
@@ -273,12 +274,12 @@ class User:
                                        , tasks=data["tasks"])
 
     def create_project(self):
-        print("please inter an ID:")
+        print("please enter an ID:")
         id = globals.get_input_with_cancel()
         if id == None:
             return
         if not os.path.exists(f'Data\\Projects_Data\\{id}'):
-            print("\nPlease inter a title:")
+            print("\nPlease enter a title:")
             title = globals.get_input_with_cancel()
             if title == None:
                 return
