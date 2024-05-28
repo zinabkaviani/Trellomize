@@ -329,37 +329,30 @@ class Task:
         """the signed in user can change the end time if he/she is the leader of the main project"""
         input = None
         if globals.signed_in_username == self.__leader:
-            print("Please inter your added time in the chosen set:")
-            options =["Minutes","Hours","Days","Weeks","Back"]
-            time_selection = options[globals.get_arrow_key_input(options=options ,available_indices=[0,1,2,3,4])]
-            match time_selection:
-                case "Minutes":
-                    input = globals.get_input_with_cancel()
-                    if input == None:
-                        return
-                    globals.get_added_time(self.__start_date ,seconds=input)
-                case "Hours":
-                    input = globals.get_input_with_cancel()
-                    if input == None:
-                        return
-                    globals.get_added_time(self.__start_date ,seconds=input)
-                case "Days":
-                    input = globals.get_input_with_cancel()
-                    if input == None:
-                        return
-                    globals.get_added_time(self.__start_date ,seconds=input)
-                case "Weeks":
-                    input = globals.get_input_with_cancel()
-                    if input == None:
-                        return
-                    globals.get_added_time(self.__start_date ,seconds=input)
-                case "Back":
-                    return
-            logger.info(f"User {globals.signed_in_username}: added {input} {time_selection} to the task {self.__random_id}")
+            print("Please enter your added time in the chosen set:")
+            options = ["Minutes", "Hours", "Days", "Weeks", "Back"]
+            time_selection = options[globals.get_arrow_key_input(options=options, available_indices=[0, 1, 2, 3, 4])]
+            if time_selection != "Back":
+                input_value = globals.get_input_with_cancel()
+                if input_value is not None:
+                    if input_value.isdigit():
+                        input_value = int(input_value)
+                        if time_selection == "Minutes":
+                            globals.get_added_time(self.__start_date, minutes=input_value)
+                        elif time_selection == "Hours":
+                            globals.get_added_time(self.__start_date, hours=input_value)
+                        elif time_selection == "Days":
+                            globals.get_added_time(self.__start_date, days=input_value)
+                        elif time_selection == "Weeks":
+                            globals.get_added_time(self.__start_date, weeks=input_value)
+                       # logger.info(f"User {globals.signed_in_username}: added {input_value} {time_selection} to the task {self.__random_id}")
+                    else:
+                        print("Invalid input. Please enter a numerical value.")
+            return
         else:
-            error_message=["Error" ,"only admin can change due date"]
-            globals.print_message(f"{error_message[0]}: {error_message[1]}",color="red")    
-
+            error_message = ["Error", "only admin can change due date"]
+            globals.print_message(f"{error_message[0]}: {error_message[1]}", color="red")
+    
     def comments_menu(self):
         """Displays the menu of the available options to do with comments"""
         options = ["Add Comments" , "Remove Comments" , "Edit Comments" , "Back"]
