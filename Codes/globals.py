@@ -32,11 +32,26 @@ TURQUOISE = '\033[38;5;45m'
 GREEN = '\033[92m'
 RESET = '\033[0m'
 
+ascii_art = r'''
+ _______  _____    ______   _        _        ____
+|_   ___||  __ \  |  ____| | |      | |      / __ \ 
+  | |    | |__) | | |__    | |      | |     | |  | | 
+  | |    |  _  /  |  __|   | |      | |     | |  | | 
+  | |    | | \ \  | |____  | |____  | |____ | |__| | 
+  |_|    |_|  \_\ |______| |______| |______| \____/ 
+         __  __   _____   ______   ______  
+        |  \/  | |_   _| |___  /  |  ____| 
+        | \  / |   | |      / /   | |__    
+        | |\/| |   | |     / /    |  __|   
+        | |  | |  _| |_   / /__   | |____  
+        |_|  |_| |_____| /_____|  |______|
+'''
+
 user_is_admin = False
 signed_in_username = None
 project_id = None
 task_id =None
-
+stop_loading = False
 
 def get_arrow_key_input(options, available_indices, display=""):
     if not available_indices:
@@ -107,13 +122,6 @@ def get_current_time() :
     return formatted_time
 
 def get_added_time(start_time, **keyword):
-    # #keywords can be days 
-    # seconds:
-    # microseconds: 
-    # milliseconds:
-    # minutes:
-    # hours
-    # weeks
     delta = datetime.timedelta(**keyword)
     end_time = datetime.datetime.strptime(start_time,"%Y-%m-%d %H:%M:%S") + delta
     return end_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -260,31 +268,26 @@ def getch():
     """Get a single character from standard input. Does not echo to the screen."""
     return msvcrt.getch()
 
-def print_ascii_art_with_color_cycle():
-    ascii_art = r'''
- _______  _____    ______   _        _        ____
-|_   ___||  __ \  |  ____| | |      | |      / __ \ 
-  | |    | |__) | | |__    | |      | |     | |  | | 
-  | |    |  _  /  |  __|   | |      | |     | |  | | 
-  | |    | | \ \  | |____  | |____  | |____ | |__| | 
-  |_|    |_|  \_\ |______| |______| |______| \____/ 
-        __   __   _____   ______   ______  
-        |  \/  | |_   _| |___  /  |  ____| 
-        | \  / |   | |      / /   | |__    
-        | |\/| |   | |     / /    |  __|   
-        | |  | |  _| |_   / /__   | |____  
-        |_|  |_| |_____| /_____|  |______|
-'''
+def reset_terminal_color():
+    os.write(1, RESET.encode())
 
+def print_ascii_art_with_color_cycle():
+    os.system("cls" if os.name == "nt" else "clear")
     colors = [RED, GREEN, YELLOW, TURQUOISE, MAGENTA] 
     color_index = 0
-    while True:
-       
-        print("\033[H", end="")
-        os.system("cls" if os.name == "nt" else "clear")
+    while not stop_loading:
+        os.write(1, b"\033[H")  # Move cursor to top of screen
         for line in ascii_art.split("\n"):
-            print(colors[color_index] + line)
-        color_index = (color_index + 1) % len(colors)
-        
+            os.write(1, colors[color_index].encode() + line.encode() + b"\n")
+        os.write(1, RESET.encode())  # Reset the color after printing
         time.sleep(1)
+        color_index = (color_index + 1) % len(colors)
+
+def loading_bar(duration=5, length=40):
+    for i in range(length + 1):
+        percent = int(100 * i / length)
+        bar = '█' * i + '-' * (length - i)
+        print(f'\r|{bar}| {percent}%', end='')
+        time.sleep(duration / length)
+    print() 
 

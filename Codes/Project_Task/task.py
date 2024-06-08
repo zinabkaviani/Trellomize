@@ -189,9 +189,9 @@ class Task:
         choice = options[globals.get_arrow_key_input(options=options, available_indices= indices_list,display=self)]
         if choice != "Back":
             logger.info(f"User {globals.signed_in_username}: added the assignee {choice} to the Task {self.__random_id}")
-            self.update_history()
+            self.update_history(f"User {globals.signed_in_username}: added the assignee {choice} to the Task {self.__random_id}")
             self.__assignees.append(choice)
-            self.__update_file_attributes(f"User {globals.signed_in_username}: added the assignee {choice} to the Task {self.__random_id}")
+            self.__update_file_attributes()
     
     def remove_assignees(self):
         """remove an assignee from the task"""
@@ -353,18 +353,19 @@ class Task:
             time_selection = options[globals.get_arrow_key_input(options=options ,available_indices=[0,1,2,3,4])]
             if time_selection == "Back":
                 return
+            print("enter the time you want to add :")
             input_value = globals.get_input_with_cancel()
             if input_value is not None:
                 if input_value.isdigit():
                     match time_selection:
                         case "Minutes":
-                            output = globals.get_added_time(self.__start_date ,seconds=input_value)
+                            output = globals.get_added_time(self.__start_date ,minutes=int(input_value))
                         case "Hours":
-                            output = globals.get_added_time(self.__start_date ,seconds=input_value)
+                            output = globals.get_added_time(self.__start_date ,hours=int(input_value))
                         case "Days":
-                            output = globals.get_added_time(self.__start_date ,seconds=input_value)
+                            output = globals.get_added_time(self.__start_date ,days=int(input_value))
                         case "Weeks":
-                            output = globals.get_added_time(self.__start_date ,seconds=input_value)
+                            output = globals.get_added_time(self.__start_date ,weeks=int(input_value))
 
 
                     logger.info(f"User {globals.signed_in_username}: added {input_value} {time_selection} to the task {self.__random_id}")

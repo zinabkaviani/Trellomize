@@ -161,6 +161,7 @@ def Log_in():
             with open("Data\\Accounts_Data\\users.txt", 'r') as file:
                 if "@" in name:
                     for line in file:
+                        
                         username , email_address = line.strip().split(',')        
                         
                         if name == email_address:
@@ -233,20 +234,21 @@ def Log_in():
 
 def account_section():
     logger.info("Application has Started")
-    options = ["Sign Up", "Log in" , "Exit"]
-    available_indices = [0, 1 , 2]
+    options = ["Sign Up", "Log in", "Exit"]
+    available_indices = [0, 1, 2]
     user = None
     while True:
-        choice = options[globals.get_arrow_key_input(options=options ,available_indices=available_indices)]
+
+        choice = options[globals.get_arrow_key_input(options=options, available_indices=available_indices)]
         if choice == "Sign Up":
             user = register()
-            if user != None:
-               user.user_menu()
-                    
+            if user is not None:
+                user.user_menu()
         elif choice == "Log in":
             user = Log_in()
-            if user != None:
+            if user is not None:
                 user.user_menu()
         else:
             logger.info("Application has been killed")
             return
+

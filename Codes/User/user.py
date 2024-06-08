@@ -74,7 +74,7 @@ class Account:
         
     def delete_user(self):
         if globals.user_is_admin:
-            os.remove("Manager\\managr.txt")
+            os.remove("Manager\\managr.json")
         with open("Data\\Accounts_Data\\users.txt", "r") as file:
             lines = file.readlines()
             with open("Data\\Accounts_Data\\users.txt", "w") as new_file:
@@ -205,27 +205,33 @@ class User:
         """opens the files of both types of projects the user has and then shows the details"""
         print("Leading Projects:")
         all_leading_projects_data =[]
-        for project in self.__leading_projects:
-            with open(f'Data\\Projects_Data\\{project}\\{project}.json', 'r') as file:
-                print(file.name)
-                data = json.load(file)
-                project_data = [data["id"],data["title"],data["leader"]]
-                all_leading_projects_data.append(project_data)
-        headers=["ID","Title","Leader"]
-        print(globals.create_project_table(headers=headers,data=all_leading_projects_data))
-        
+        if len(self.__leading_projects) != 0:
+            for project in self.__leading_projects:
+                with open(f'Data\\Projects_Data\\{project}\\{project}.json', 'r') as file:
+                    data = json.load(file)
+                    project_data = [data["id"],data["title"],data["leader"]]
+                    all_leading_projects_data.append(project_data)
+            headers=["ID","Title","Leader"]
+            print(globals.create_project_table(headers=headers,data=all_leading_projects_data))
+        else:
+            error_message =["Error","You have not created any project yet"]
+            globals.print_message(f"{error_message[0]}: {error_message[1]}",color="red")
         
         print("Contributing Projects:")
-        all_contributing_projects_data =[]         
-        for project in self.__contributing_projects:
-            with open(f'Data\\Projects_Data\\{project}\\{project}.json', 'r') as file:
-                data = json.load(file)
-                project_data = [data["id"],data["title"],data["leader"]]
-                all_contributing_projects_data.append(project_data)
-        headers=["ID","Title","Leader"]
-        print(globals.create_project_table(headers=headers,data=all_contributing_projects_data))
+        all_contributing_projects_data =[]     
+        if len(self.__contributing_projects) != 0:    
+            for project in self.__contributing_projects:
+                with open(f'Data\\Projects_Data\\{project}\\{project}.json', 'r') as file:
+                    data = json.load(file)
+                    project_data = [data["id"],data["title"],data["leader"]]
+                    all_contributing_projects_data.append(project_data)
+            headers=["ID","Title","Leader"]
+            print(globals.create_project_table(headers=headers,data=all_contributing_projects_data))
+        else:
+            error_message =["Error","You are not member of any project yet"]
+            globals.print_message(f"{error_message[0]}: {error_message[1]}",color="red")
         globals.getch() 
-        
+            
     
     def choose_project(self):
         while True:
@@ -372,7 +378,7 @@ class User:
 
     @staticmethod
     def user_activation():
-        print("Enter a username or email address to deactivate the User: (cancel with Esc):")
+        print("Enter a username or email address to activate the User: (cancel with Esc):")
         user = globals.get_input_with_cancel()
         if user != None:
             if check_email_format(user):
@@ -432,7 +438,14 @@ class User:
                     result = self.choose_project()
                     if result != None:
                         result.project_menu()
-                
+                        if result.project_menu() =="leave":
+                            if result.__id in self.__contributing_projects:
+                                self.__contributing_projects.remove(result.__id)
+                                self.__update_file_attributes()
+                            else:
+                                self.__leading_projects.remove(result.__id)
+                                self.__update_file_attributes()
+                                             
                 case "Delete Project" :
                     self.delete_project()
 

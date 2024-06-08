@@ -261,6 +261,7 @@ class Project :
         if answer == "yes":
             logger.info(f"User {globals.signed_in_username}: left the project {self.__id}")
             self.leaving_projects()  
+            self.__update_file_attributes()
             return "leave"   
          
         
@@ -274,6 +275,7 @@ class Project :
                     with open(f"Data\\Accounts_Data\\Users\\{member}.json" , "w") as updated_file :
                         globals.json.dump(data,updated_file)
             globals.shutil.rmtree(f"Data\\Projects_Data\\{self.__id}")
+
 
         elif globals.signed_in_username in self.__members :
             with open(f"Data\\Accounts_Data\\Users\\{globals.signed_in_username}.json" , "r") as file :
@@ -319,6 +321,6 @@ class Project :
                         chosen_task.task_menu()
                 case "Leave Project":
                     if self.leave_project() == "leave":
-                        return
+                        return "leave"
                 case "Exit Project":
                     return
