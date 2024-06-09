@@ -98,6 +98,6 @@ Trellomize is designed to simplify the process of managing projects, tasks, and 
 
 ---
 
-Developed by Zeinab Kaviani and Amir Rahmani.
+Developed by Zinab Kaviani and Amir Rahmani.
 
 Thank you for choosing Trellomize. We hope this README helps you get the most out of our application. If you have any questions or need further assistance, please do not hesitate to contact our support team.
