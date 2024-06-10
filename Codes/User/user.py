@@ -1,52 +1,9 @@
 import json
 import os
 from Codes import globals
-import re
 from Codes.logfile import logger
 from Codes.Project_Task import project
-
-def check_email_format(email):
-    pattern = r'^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outlook|hotmail|live|aol)\.com$'
-    return re.match(pattern, email) is not None and ',' not in email
-
-def delete_project_from_data(project_id):
-    with open(f"Data\\Projects_Data\\{project_id}\\{project_id}.json" , "r") as project_file:
-        project_data= json.load(project_file)
-        for member in project_data["members"]:
-            with open(f"Data\\Accounts_Data\\Users\\{member}.json" , "r") as file :
-                task_data = globals.json.load(file)
-                task_data["contributing_projects"].remove(project_id)
-                with open(f"Data\\Accounts_Data\\Users\\{member}.json" , "w") as updated_file :
-                    globals.json.dump(task_data,updated_file)
-    globals.shutil.rmtree(f"Data\\Projects_Data\\{project_id}")
-    
-def check_existing_username(username):
-    if os.path.exists("Data\\Accounts_Data\\users.txt"):
-        with open("Data\\Accounts_Data\\users.txt", "r") as file:
-            for line in file:
-                stored_username, email = line.strip().split(',')
-                if username == stored_username:
-                    return True
-    return False
-
-def check_existing_email(email_address):
-    if os.path.exists("Data\\Accounts_Data\\users.txt"):
-        with open("Data\\Accounts_Data\\users.txt", "r") as file:
-            for line in file:
-                username , sorted_email_address = line.strip().split(',')
-                if email_address == sorted_email_address:
-                    return True
-    return False
-
-def admin_email_check(user_email_address):
-
-    if os.path.exists("Manager\\manager.json"):
-        with open("Manager\\manager.json","r")as file:
-            admin_data = globals.json.load(file)
-            if user_email_address == admin_data["email_address"]:
-                return True
-    return False  
-
+import json
 
 class Account:
     
@@ -90,13 +47,13 @@ class Account:
                     project_data["members"].remove(self.__username)
                     for task_id in project_data["tasks"]:
                         with open(f"Data\\Projects_Data\\{project_id}\\Project_Tasks\\{task_id}.json" , 'r') as file :
-                            task_data = globals.json.load(file)
+                            task_data = json.load(file)
                             task_data["assignees"].remove(self.__username)
                             task_data["candidates_for_assignment"].remove(self.__username)
                             with open(f"Data\\Projects_Data\\{project_id}\\Project_Tasks\\{task_id}.json" , 'w') as updated_file :
-                                globals.json.dump(task_data,updated_file)
+                                json.dump(task_data,updated_file)
             for project_id in data["leading_projects"]:
-                delete_project_from_data(project_id=project_id)
+                globals.delete_project_from_data(project_id=project_id)
         os.remove(f"Data\\Accounts_Data\\Users\\{self.__username}.json")
 
 
@@ -136,13 +93,13 @@ class Account:
             
             if new_email == None:
                 return
-            if not check_email_format(new_email):
+            if not globals.check_email_format(new_email):
                 error_messages =["Error" , "Email format is incorrect."]
                 logger.info(f"User {self.__username}: input incorrect email format")
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color="red")
                 return
 
-            if not check_existing_email(new_email):
+            if not globals.check_existing_email(new_email):
                 with open("Data\\Accounts_Data\\users.txt", "r") as file:
                     lines = file.readlines()
                 with open("Data\\Accounts_Data\\users.txt", "w") as file:
@@ -161,7 +118,7 @@ class Account:
                             "email_address": self.__email_address,
                             "password": self.__password
                             }
-                        globals.json.dump(data , file)
+                        json.dump(data , file)
                 logger.info(f"User {self.__username}: Email address updated successfully")
                 globals.print_message("Email address updated successfully.", color="green")
 
@@ -230,7 +187,6 @@ class User:
         else:
             error_message =["Error","You are not member of any project yet"]
             globals.print_message(f"{error_message[0]}: {error_message[1]}",color="red")
-        globals.getch() 
             
     
     def choose_project(self):
@@ -317,8 +273,9 @@ class User:
             certain = 1 - globals.get_arrow_key_input(["Yes" , "No"] , available_indices= [0 , 1])
             if certain:
                 logger.info(f"User {globals.signed_in_username}: deleted the project {self.__leading_projects[choice]}")
-                delete_project_from_data(self.__leading_projects[choice])
+                globals.delete_project_from_data(self.__leading_projects[choice])
                 self.__leading_projects.remove(self.__leading_projects[choice])
+                self.__update_file_attributes()
                 return
 
     def users_management(self):
@@ -335,11 +292,11 @@ class User:
         print("Enter a username or email address to deactivate the User: (cancel with Esc):")
         user = globals.get_input_with_cancel()
         if user != None:
-            if user == globals.signed_in_username or admin_email_check(user):
+            if user == globals.signed_in_username or globals.admin_email_check(user):
                 logger.error("Attempt to deactivate admin")
                 globals.print_message("You cannot deactivate yourself" , "red")
                 return
-            if check_email_format(user):
+            if globals.check_email_format(user):
                 with open("Data\\Accounts_Data\\users.txt", "r") as file:
                     for line in file:
                         username , sorted_email_address = line.strip().split(',')
@@ -381,7 +338,7 @@ class User:
         print("Enter a username or email address to activate the User: (cancel with Esc):")
         user = globals.get_input_with_cancel()
         if user != None:
-            if check_email_format(user):
+            if globals.check_email_format(user):
                 with open("Data\\Accounts_Data\\users.txt", "r") as file:
                     for line in file:
                         username , sorted_email_address = line.strip().split(',')
@@ -437,13 +394,13 @@ class User:
                 case "Choose Project" :
                     result = self.choose_project()
                     if result != None:
-                        result.project_menu()
-                        if result.project_menu() =="leave":
-                            if result.__id in self.__contributing_projects:
-                                self.__contributing_projects.remove(result.__id)
+                        closed = result.project_menu()
+                        if closed == "leave":
+                            if result.get_id() in self.__contributing_projects:
+                                self.__contributing_projects.remove(result.get_id())
                                 self.__update_file_attributes()
                             else:
-                                self.__leading_projects.remove(result.__id)
+                                self.__leading_projects.remove(result.get_id())
                                 self.__update_file_attributes()
                                              
                 case "Delete Project" :

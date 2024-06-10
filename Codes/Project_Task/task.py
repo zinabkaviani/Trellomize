@@ -1,6 +1,8 @@
 from Codes import globals
 from Codes.logfile import logger
 from enum import Enum, auto
+import json
+from datetime import datetime
 
 class Comment:
     def __init__(self, username, text, date_of_comment, time_of_comment):
@@ -151,7 +153,7 @@ class Task:
                           "time_of_comment": comment.get_time_of_comment()} for comment in self.__comments]
         }
         with open(f"Data\\Projects_Data\\{globals.project_id}\\Project_Tasks\\{self.__random_id}.json" , 'w') as file:
-            globals.json.dump(task_data , file)
+            json.dump(task_data , file)
 
     def edit_title(self):
         """sets a new title for task with input"""
@@ -274,7 +276,7 @@ class Task:
 
     def update_history(self , added_history):
         """Updates all activities of the leader and assignees"""
-        self.__history += "\n" + globals.GREEN + str(globals.datetime.datetime.now()) + "| " + globals.RESET + added_history
+        self.__history += "\n" + globals.GREEN + str(datetime.now()) + "| " + globals.RESET + added_history
         
     def display_comments(self):
         """Displays all the comments on the Task"""
@@ -298,8 +300,8 @@ class Task:
             else:
                 logger.info(f"User {globals.signed_in_username}: added comment to the Task {self.__random_id}")
                 comment_obj = Comment(text=comment, username=globals.signed_in_username,\
-                                date_of_comment=str(globals.datetime.datetime.now().date()),\
-                                time_of_comment=globals.datetime.datetime.now().time().strftime("%H:%M:%S"))
+                                date_of_comment=str(datetime.now().date()),\
+                                time_of_comment=datetime.now().time().strftime("%H:%M:%S"))
                 self.__comments.append(comment_obj)
                 self.__update_file_attributes()
                 return comment_obj

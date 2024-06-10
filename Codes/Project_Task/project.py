@@ -2,16 +2,8 @@ from Codes import globals
 from Codes.Project_Task import task
 import os
 from Codes.logfile import logger
-
-def check_existing_username(username,file_path="Data\\Accounts_Data\\users.txt"):
-    if os.path.exists(path=file_path):
-        with open(file_path, "r") as file:
-            for line in file:
-                stored_username, email = line.strip().split(',')
-                if username == stored_username:
-                    return True
-    return False
-
+import json
+import shutil
 
 class Project :
     def __init__(self, id , title ,members ,leader , tasks ):
@@ -52,20 +44,23 @@ class Project :
             "tasks": self.__tasks
         }
         with open(f"Data\\Projects_Data\\{self.__id}\\{self.__id}.json" , 'w') as file :
-            globals.json.dump(data,file)
+            json.dump(data,file)
 
+    def get_id(self):
+        return self.__id
+    
     def add_member(self) :
         """leader can add members via username"""
         print("Please enter member's username to add :")
         member = globals.get_input_with_cancel()
-        if check_existing_username(member):
+        if globals.check_existing_username(member):
             if member not in [*self.__members , self.__leader]:
                 self.__members.append(member)
                 with open(f"Data\\Accounts_Data\\Users\\{member}.json" , 'r') as file:
-                    user_data = globals.json.load(file)
+                    user_data = json.load(file)
                     user_data["contributing_projects"].append(self.__id)
                     with open(f"Data\\Accounts_Data\\Users\\{member}.json" , 'w') as updated_file:
-                        globals.json.dump(user_data, updated_file)
+                        json.dump(user_data, updated_file)
                 globals.print_message("Member successfully added to project members",color="green")
                 logger.info(f"User {globals.signed_in_username}: Added member {member} to the project {self.__id}")
             else:
@@ -87,13 +82,13 @@ class Project :
             if certain:
                 for task_id in self.__tasks :
                     with open(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{task_id}.json" , 'r') as file :
-                        data = globals.json.load(file)
+                        data = json.load(file)
                         data["assignees"].remove(self.__members[chosen_index])
                 
                         with open(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{task_id}.json" , 'w') as updated_file :
-                            globals.json.dump(data,updated_file)
+                            json.dump(data,updated_file)
                 with open(f"Data\\Accounts_Data\\Users\\{self.__members[chosen_index]}.json") as file:
-                    user_data = globals.json.load(file)
+                    user_data = json.load(file)
                     user_data["contributing_projects"].remove(self.__id)
                 logger.info(f"User {globals.signed_in_username}: removed the member {self.__members[chosen_index]} from the project {self.__id}")
                 self.__members.remove(self.__members[chosen_index])
@@ -141,7 +136,7 @@ class Project :
         all_tasks =[]
         for task_id in self.__tasks:
             with open(f'Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{task_id}.json', 'r') as file:
-                data = globals.json.load(file)      
+                data = json.load(file)      
                 all_tasks.append([globals.justify_input(data["id"]), globals.justify_input(data["title"]), self.__leader,globals.justify_input(data["description"]), data["status"], \
                                  data["priority"]])
         
@@ -187,7 +182,7 @@ class Project :
                 "history" : "" ,
                 "comments" : []
             }
-            globals.json.dump(data,file)
+            json.dump(data,file)
         self.__tasks.append(rand_id)
         logger.info(f"User {globals.signed_in_username}: add the task {rand_id} to the project {self.__id}")
         self.__update_file_attributes()
@@ -199,7 +194,7 @@ class Project :
         available_tasks =[]     
         for task_id in self.__tasks:
             with open(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{task_id}.json" , "r") as file :
-                data= globals.json.load(file)
+                data= json.load(file)
                 available_tasks.append(data["title"] + 10 * ' ' + task_id + '\n'  + data["description"])
         available_tasks.append("Back")
         available_indices = list(range(len(available_tasks)))
@@ -224,7 +219,7 @@ class Project :
         choice = None
         for task_id in self.__tasks:
             with open(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{task_id}.json" , "r") as file :
-                data= globals.json.load(file)
+                data= json.load(file)
                 available_tasks.append(data["title"] + 10 * ' ' + task_id + '\n'  + data["description"])
         available_tasks.append("Back")
         available_indices = list(range(len(available_tasks)))
@@ -233,7 +228,7 @@ class Project :
             choice = self.__tasks[chosen_index]
         if choice != None:
             with open(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{choice}.json" , "r") as file :
-                data= globals.json.load(file)
+                data= json.load(file)
                 candidates_for_assignment = data["candidates_for_assignment"]
                 title = data["title"]
                 description= data["description"]
@@ -258,10 +253,9 @@ class Project :
         options =["Yes" ,"No"]
         available_indices = [0 ,1]
         answer = options[ globals.get_arrow_key_input(options=options ,available_indices=available_indices,display="Are you sure about this?")]
-        if answer == "yes":
+        if answer == "Yes":
             logger.info(f"User {globals.signed_in_username}: left the project {self.__id}")
             self.leaving_projects()  
-            self.__update_file_attributes()
             return "leave"   
          
         
@@ -270,32 +264,32 @@ class Project :
         if self.__leader == globals.signed_in_username:
             for member in self.__members:
                 with open(f"Data\\Accounts_Data\\Users\\{member}.json" , "r") as file :
-                    data = globals.json.load(file)
+                    data = json.load(file)
                     data["contributing_projects"].remove(self.__id)
                     with open(f"Data\\Accounts_Data\\Users\\{member}.json" , "w") as updated_file :
-                        globals.json.dump(data,updated_file)
-            globals.shutil.rmtree(f"Data\\Projects_Data\\{self.__id}")
+                        json.dump(data,updated_file)
+            shutil.rmtree(f"Data\\Projects_Data\\{self.__id}")
 
 
         elif globals.signed_in_username in self.__members :
             with open(f"Data\\Accounts_Data\\Users\\{globals.signed_in_username}.json" , "r") as file :
-                    data = globals.json.load(file)
-                    data["contributing_projects"].remove(self.__id)
-                    with open(f"Data\\Accounts_Data\\Users\\{globals.signed_in_username}.json" , "w") as updated_file :
-                        globals.json.dump(data,updated_file)
+                data = json.load(file)
+                data["contributing_projects"].remove(self.__id)
+                with open(f"Data\\Accounts_Data\\Users\\{globals.signed_in_username}.json" , "w") as updated_file :
+                    json.dump(data,updated_file)
             for task_id in self.__tasks :
                 with open(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{task_id}.json" , "r") as file :
-                    data= globals.json.load(file)
+                    data= json.load(file)
                     data["assignees"].remove(globals.signed_in_username)
                     with open(f"Data\\Projects_Data\\{self.__id}\\Project_Tasks\\{task_id}.json" , "w") as updated_file :
-                        globals.json.dump(data,updated_file)
-
+                        json.dump(data,updated_file)
             self.__members.remove(globals.signed_in_username)
             self.__update_file_attributes()
+        
 
     def project_menu(self) :
         while True: 
-            options = ["Add Member" ,"Remove Member" ,"Display Tasks","Add_Task" , "Remove Task" ,"Choose Task" ,"Leave Project" , "Exit Project"]
+            options = ["Add Member" ,"Remove Member" ,"Display Tasks" , "Add_Task" , "Remove Task" ,"Choose Task" ,"Leave Project" , "Exit Project"]
             indices_list = list(range(len(options)))
             choice = None
             if self.__leader == globals.signed_in_username :
@@ -320,7 +314,8 @@ class Project :
                     if chosen_task != None:
                         chosen_task.task_menu()
                 case "Leave Project":
-                    if self.leave_project() == "leave":
+                    left  = self.leave_project()
+                    if left == "leave":
                         return "leave"
                 case "Exit Project":
                     return

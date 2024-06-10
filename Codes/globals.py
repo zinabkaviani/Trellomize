@@ -1,13 +1,15 @@
 import os
-import shutil
 import msvcrt
 from colored import fg, attr
-import json
 import string
 import random
 import time
-import datetime
+from datetime import datetime , timedelta
 import keyboard
+import json
+import bcrypt
+import re
+import shutil
 
     # Unicode characters for rounded corners and lines
 tl = '╭' # top-left
@@ -53,6 +55,78 @@ project_id = None
 task_id =None
 stop_loading = False
 
+def encode_password(password_input):
+    return bcrypt.hashpw(password_input.encode('utf-8'), bcrypt.gensalt())
+     
+def check_password(entered_password , hashed_password):
+    return bcrypt.checkpw(entered_password.encode('utf-8'), hashed_password.encode('utf-8'))
+
+def check_email_format(email):
+    pattern = r'^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outlook|hotmail|live|aol)\.com$'
+    return re.match(pattern, email) is not None and ',' not in email
+
+def is_valid_username(username):
+    """username should not have special characters"""
+    if not re.match("^[A-Za-z0-9,;]*$", username):
+        return False
+    return True
+
+
+def is_username_length_valid( username):
+        """"username is at most 15 characters long"""
+        if len(username) >= 15 or len(username) == 0:
+            return False
+        return True
+
+def check_existing_username(username):
+    if os.path.exists("Data\\Accounts_Data\\users.txt"):
+        with open("Data\\Accounts_Data\\users.txt", "r") as file:
+            for line in file:
+                stored_username, email = line.strip().split(',')
+                if username == stored_username:
+                    return True
+    return False
+
+
+def check_existing_email(email_address):
+    if os.path.exists("Data\\Accounts_Data\\users.txt"):
+        with open("Data\\Accounts_Data\\users.txt", "r") as file:
+            for line in file:
+                user_name , sorted_email_address = line.strip().split(',')
+                if email_address == sorted_email_address:
+                    return True
+    return False
+    
+def admin_username_check(user_username):
+
+    if os.path.exists("Manager\\manager.json"):
+        with open("Manager\\manager.json","r")as file:
+            admin_data = json.load(file)
+            if user_username == admin_data["username"]:
+                return True
+    return False
+
+def admin_email_check(user_email_address):
+
+    if os.path.exists("Manager\\manager.json"):
+        with open("Manager\\manager.json","r")as file:
+            admin_data = json.load(file)
+            if user_email_address == admin_data["email_address"]:
+                return True
+    return False  
+
+def delete_project_from_data(project_id):
+    with open(f"Data\\Projects_Data\\{project_id}\\{project_id}.json" , "r") as project_file:
+        project_data= json.load(project_file)
+        for member in project_data["members"]:
+            with open(f"Data\\Accounts_Data\\Users\\{member}.json" , "r") as file :
+                task_data = json.load(file)
+                task_data["contributing_projects"].remove(project_id)
+                with open(f"Data\\Accounts_Data\\Users\\{member}.json" , "w") as updated_file :
+                    json.dump(task_data,updated_file)
+    shutil.rmtree(f"Data\\Projects_Data\\{project_id}")
+    
+    
 def get_arrow_key_input(options, available_indices, display=""):
     if not available_indices:
         return None 
@@ -73,8 +147,8 @@ def get_arrow_key_input(options, available_indices, display=""):
     while True:
         print_options(options, selected_index, available_indices)
         key = keyboard.read_event(suppress=True)
-
-        if key.event_type == keyboard.KEY_DOWN:
+        if key.event_type != keyboard.KEY_DOWN:
+            key = keyboard.read_event(suppress=True)
             if key.name == 'up':
                 selected_index = available_indices[(available_indices.index(selected_index) - 1) % len(available_indices)]
             elif key.name == 'down':
@@ -117,13 +191,13 @@ def generate_random_id(existing_ids, length= 6):
             return random_id
         
 def get_current_time() :
-    current_time = datetime.datetime.now()
+    current_time = datetime.now()
     formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
     return formatted_time
 
 def get_added_time(start_time, **keyword):
-    delta = datetime.timedelta(**keyword)
-    end_time = datetime.datetime.strptime(start_time,"%Y-%m-%d %H:%M:%S") + delta
+    delta = timedelta(**keyword)
+    end_time = datetime.strptime(start_time,"%Y-%m-%d %H:%M:%S") + delta
     return end_time.strftime("%Y-%m-%d %H:%M:%S")
 
 def get_input_with_cancel(drafted_text = ""):
@@ -283,11 +357,16 @@ def print_ascii_art_with_color_cycle():
         time.sleep(1)
         color_index = (color_index + 1) % len(colors)
 
-def loading_bar(duration=5, length=40):
+def loading_bar(duration=5, length=50):
+    time.sleep(0.2)
     for i in range(length + 1):
         percent = int(100 * i / length)
         bar = '█' * i + '-' * (length - i)
         print(f'\r|{bar}| {percent}%', end='')
-        time.sleep(duration / length)
+        if i == 45:
+            time.sleep(1.5)
+        if i >= 45 and i <= 47:
+            time.sleep(10 / i)
+        time.sleep(0.9999 ** (percent * 1.25) / length)
     print() 
 

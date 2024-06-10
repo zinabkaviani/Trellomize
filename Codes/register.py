@@ -1,69 +1,8 @@
-import bcrypt
 from Codes import globals
 import Codes.User.user as user
-import re
 import os
 from Codes.logfile import logger
-
-def encode_password(password_input):
-    return bcrypt.hashpw(password_input.encode('utf-8'), bcrypt.gensalt())
-     
-def check_password(entered_password , hashed_password):
-    return bcrypt.checkpw(entered_password.encode('utf-8'), hashed_password.encode('utf-8'))
-
-def check_email_format(email):
-    pattern = r'^[a-zA-Z0-9._%+-]+@(gmail|yahoo|outlook|hotmail|live|aol)\.com$'
-    return re.match(pattern, email) is not None and ',' not in email
-
-def is_valid_username(username):
-    """username should not have special characters"""
-    if not re.match("^[A-Za-z0-9,;]*$", username):
-        return False
-    return True
-
-
-def is_username_length_valid( username):
-        """"username is at most 15 characters long"""
-        if len(username) >= 15 or len(username) == 0:
-            return False
-        return True
-
-def check_existing_username(username):
-    if os.path.exists("Data\\Accounts_Data\\users.txt"):
-        with open("Data\\Accounts_Data\\users.txt", "r") as file:
-            for line in file:
-                stored_username, email = line.strip().split(',')
-                if username == stored_username:
-                    return True
-    return False
-
-
-def check_existing_email(email_address):
-    if os.path.exists("Data\\Accounts_Data\\users.txt"):
-        with open("Data\\Accounts_Data\\users.txt", "r") as file:
-            for line in file:
-                user_name , sorted_email_address = line.strip().split(',')
-                if email_address == sorted_email_address:
-                    return True
-    return False
-    
-def admin_username_check(user_username):
-
-    if os.path.exists("Manager\\manager.json"):
-        with open("Manager\\manager.json","r")as file:
-            admin_data = globals.json.load(file)
-            if user_username == admin_data["username"]:
-                return True
-    return False
-
-def admin_email_check(user_email_address):
-
-    if os.path.exists("Manager\\manager.json"):
-        with open("Manager\\manager.json","r")as file:
-            admin_data = globals.json.load(file)
-            if user_email_address == admin_data["email_address"]:
-                return True
-    return False  
+import json
         
 def register():
 
@@ -77,12 +16,12 @@ def register():
         username = globals.get_input_with_cancel()
         if username == None:
             return
-        if not is_username_length_valid(username=username):
+        if not globals.is_username_length_valid(username=username):
             logger.info("Attempt to register with invalid length")
             error_messages =["Error" , "Username should be less than 15 character and not empty."]
             globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
             continue
-        if not is_valid_username(username=username):
+        if not globals.is_valid_username(username=username):
             logger.info("attempt to register with invalid characters")
             error_messages =["Error" , "Username can't have special character."]
             globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
@@ -103,14 +42,14 @@ def register():
             globals.print_message("Error: Your password must be atleast 6 characters" , color="red")
             continue
         
-        if check_email_format( email_address) == True:
+        if globals.check_email_format( email_address) == True:
 
-            if check_existing_username(username):
+            if globals.check_existing_username(username):
                 logger.info("User attempted to register with existing username")
                 error_messages = ["Error", "Username already exists."]
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}", color="red")
             
-            elif check_existing_email(email_address) :
+            elif globals.check_existing_email(email_address) :
                 logger.info("User attempted to register with existing email_address")
                 error_messages =["Error" , "Email address already exists."]
                 globals.print_message(f"{error_messages[0]}: {error_messages[1]}" , color ="red")
@@ -120,7 +59,7 @@ def register():
                     file.write(f"{username},{email_address}\n")
                 logger.info(f"User {username}: Account successfully created.")
                 globals.print_message("Account successfully created.", color="green")
-                password = encode_password(password)
+                password = globals.encode_password(password)
                 password = password.decode('utf8')
                 break
         else :
@@ -138,7 +77,7 @@ def register():
     }
     
     with open(f"Data\\Accounts_Data\\Users\\{username}.json","w" ) as file:
-        globals.json.dump(data ,file)
+        json.dump(data ,file)
     globals.signed_in_username = username
     logger.info(f"User {username}: Account has been created successfuly")
     return user.User(account=user.Account(username=username , email_address = email_address ,password=password),\
@@ -166,10 +105,10 @@ def Log_in():
                         
                         if name == email_address:
                             with open(f"Data\\Accounts_Data\\Users\\{username}.json", 'r') as file:
-                                user_data = globals.json.load(file)
+                                user_data = json.load(file)
                                                 
-                            if check_password(entered_password=password ,hashed_password= user_data["account"]["password"]):
-                                if admin_email_check(name):
+                            if globals.check_password(entered_password=password ,hashed_password= user_data["account"]["password"]):
+                                if globals.admin_email_check(name):
                                     logger.info("Admin logged in successfuly")
                                     globals.user_is_admin = True
                                     globals.signed_in_username = username
@@ -183,7 +122,7 @@ def Log_in():
                                                                             password=user_data["account"]["password"]),contributing_projects=user_data["contributing_projects"],\
                                                                             leading_projects=user_data["leading_projects"])
 
-                            elif admin_email_check(name):
+                            elif globals.admin_email_check(name):
                                 logger.error("Failed attempt to login as admin")
                     error_messages =["Error" , "Email address or Password is incorrect"]
                     log_message = f"Failed attempt to login with email {name}"
@@ -202,10 +141,10 @@ def Log_in():
                         
                         if name == username:            
                             with open(f"Data\\Accounts_Data\\Users\\{username}.json", 'r') as file:
-                                user_data = globals.json.load(file)
+                                user_data = json.load(file)
                                                 
-                            if check_password(entered_password=password ,hashed_password= user_data["account"]["password"]):
-                                if admin_username_check(name):
+                            if globals.check_password(entered_password=password ,hashed_password= user_data["account"]["password"]):
+                                if globals.admin_username_check(name):
                                     globals.user_is_admin = True
                                     globals.signed_in_username = username
                                     logger.info("Admin logged in successfuly")
@@ -219,7 +158,7 @@ def Log_in():
                                                                         password=user_data["account"]["password"]),contributing_projects=user_data["contributing_projects"],\
                                                                         leading_projects=user_data["leading_projects"])
 
-                            elif admin_username_check(name):
+                            elif globals.admin_username_check(name):
                                 logger.error("Failed attempt to login as admin")
                     error_messages =["Error" , "Username or Password is incorrect"]
                     log_message = f"Failed attempt to login with username {name}"
@@ -238,7 +177,6 @@ def account_section():
     available_indices = [0, 1, 2]
     user = None
     while True:
-
         choice = options[globals.get_arrow_key_input(options=options, available_indices=available_indices)]
         if choice == "Sign Up":
             user = register()
